@@ -217,12 +217,74 @@ Khi so sánh 18 giá trị đã thử, `CUTOFF = 64` có median thấp nhất tr
 
 Các kết quả tốt nhất của từng bộ dữ liệu được lưu trong `analysis/best_cutoff.csv` và `analysis/best_cutoff_from_run.csv`.
 
+
 ### 6.3. Biểu đồ tổng hợp
 
-- `analysis/comparison_cutoff_7_10.png`: so sánh median của CUTOFF 7 và 10 trên 16 bộ dữ liệu.
-- `analysis/best_cutoff_by_dataset.png`: thể hiện CUTOFF có median thấp nhất trong miền đã thử đối với từng bộ dữ liệu.
+Hai biểu đồ dưới đây thể hiện kết quả nổi bật của thí nghiệm.
 
-Ngoài ra, `analysis/` chứa biểu đồ thời gian theo CUTOFF riêng cho từng bộ dữ liệu.
+**So sánh hiệu năng giữa CUTOFF = 7 và CUTOFF = 10**
+
+![So sánh CUTOFF 7 và CUTOFF 10](analysis/comparison_cutoff_7_10.png)
+
+**CUTOFF có median thấp nhất theo từng bộ dữ liệu**
+
+![CUTOFF tốt nhất theo từng bộ dữ liệu](analysis/best_cutoff_by_dataset.png)
+
+### 6.4. Biểu đồ chi tiết theo từng bộ dữ liệu
+
+Các biểu đồ dưới đây thể hiện median thời gian chạy theo từng giá trị CUTOFF, tương ứng với 4 dạng dữ liệu và 4 kích thước mảng.
+
+<details>
+<summary><strong>Dữ liệu ngẫu nhiên (Random)</strong></summary>
+
+| 10.000 phần tử | 50.000 phần tử |
+|---|---|
+| ![Random 10000](analysis/random_10000.txt.png) | ![Random 50000](analysis/random_50000.txt.png) |
+
+| 100.000 phần tử | 250.000 phần tử |
+|---|---|
+| ![Random 100000](analysis/random_100000.txt.png) | ![Random 250000](analysis/random_250000.txt.png) |
+
+</details>
+
+<details>
+<summary><strong>Dữ liệu tăng dần (Sorted)</strong></summary>
+
+| 10.000 phần tử | 50.000 phần tử |
+|---|---|
+| ![Sorted 10000](analysis/sorted_10000.txt.png) | ![Sorted 50000](analysis/sorted_50000.txt.png) |
+
+| 100.000 phần tử | 250.000 phần tử |
+|---|---|
+| ![Sorted 100000](analysis/sorted_100000.txt.png) | ![Sorted 250000](analysis/sorted_250000.txt.png) |
+
+</details>
+
+<details>
+<summary><strong>Dữ liệu giảm dần (Reverse)</strong></summary>
+
+| 10.000 phần tử | 50.000 phần tử |
+|---|---|
+| ![Reverse 10000](analysis/reverse_10000.txt.png) | ![Reverse 50000](analysis/reverse_50000.txt.png) |
+
+| 100.000 phần tử | 250.000 phần tử |
+|---|---|
+| ![Reverse 100000](analysis/reverse_100000.txt.png) | ![Reverse 250000](analysis/reverse_250000.txt.png) |
+
+</details>
+
+<details>
+<summary><strong>Dữ liệu gần tăng dần (Nearly sorted)</summary>
+
+| 10.000 phần tử | 50.000 phần tử |
+|---|---|
+| ![Nearly sorted 10000](analysis/nearly_sorted_10000.txt.png) | ![Nearly sorted 50000](analysis/nearly_sorted_50000.txt.png) |
+
+| 100.000 phần tử | 250.000 phần tử |
+|---|---|
+| ![Nearly sorted 100000](analysis/nearly_sorted_100000.txt.png) | ![Nearly sorted 250000](analysis/nearly_sorted_250000.txt.png) |
+
+</details>
 
 ## 7. Các tệp kết quả
 
