@@ -1,73 +1,269 @@
 # Thí nghiệm tìm CUTOFF phù hợp cho Top-down Mergesort
 
+Repository: <https://github.com/hoangdinhdat1147/MergeSort-CUTOFF-Experiment>
+
+Dự án khảo sát ảnh hưởng của ngưỡng `CUTOFF` đến thời gian chạy của một cài đặt **Top-down Mergesort**. Khi kích thước đoạn con không vượt quá `CUTOFF`, chương trình sử dụng **Insertion Sort** để sắp xếp đoạn đó; với các đoạn lớn hơn, thuật toán tiếp tục chia đôi và trộn như Mergesort thông thường.
+
+Thí nghiệm tập trung so sánh hai giá trị thường được đề cập là `CUTOFF = 7` và `CUTOFF = 10`, đồng thời khảo sát thêm các giá trị khác để tìm vùng có hiệu năng tốt trên những bộ dữ liệu đã chọn.
+
 ## 1. Mục tiêu
 
-Khảo sát ảnh hưởng của ngưỡng `CUTOFF` đến thời gian chạy của cùng một cài đặt Top-down Mergesort. Khi đoạn con có kích thước không vượt quá CUTOFF, thuật toán dùng Insertion Sort; các đoạn lớn hơn tiếp tục được chia đôi và trộn. Thí nghiệm so sánh riêng hai giá trị 7 và 10, đồng thời khảo sát toàn bộ miền CUTOFF đã chọn.
+- Đo ảnh hưởng của `CUTOFF` đến thời gian chạy của cùng một cài đặt Top-down Mergesort.
+- So sánh riêng hiệu năng của `CUTOFF = 7` và `CUTOFF = 10`.
+- Khảo sát nhiều giá trị `CUTOFF` trên các kích thước và dạng dữ liệu khác nhau.
+- Dùng số liệu đo lặp, median và độ lệch chuẩn để đánh giá kết quả thay vì kết luận từ một lần chạy đơn lẻ.
 
-## 2. Môi trường và yêu cầu
+## 2. Cấu trúc dự án
 
-- Java: JDK 11 trở lên; lần chạy báo cáo dùng Java 25.0.2 LTS (`javac 25.0.2`).
-- Python: 3.9 trở lên; lần chạy báo cáo dùng Python 3.14.7.
-- Matplotlib: 3.11.2.
-- Hệ điều hành tại lần chạy báo cáo: Windows, thao tác qua Windows PowerShell 5.1.
+```text
+MergeSort-CUTOFF-Experiment/
+│
+├── datasets/                         # Các bộ dữ liệu đầu vào
+│
+├── src/                              # Mã nguồn Java
+│   ├── MergeSort.java
+│   └── Experiment.java
+│
+├── scripts/                          # Công cụ sinh dữ liệu và phân tích
+│   ├── generate_data.py
+│   └── analyze_results.py
+│
+├── analysis/                         # Bảng thống kê và biểu đồ
+│   ├── summary.csv
+│   ├── best_cutoff.csv
+│   ├── cutoff_7_10_comparison.csv
+│   ├── best_cutoff_from_run.csv
+│   ├── comparison_cutoff_7_10.png
+│   ├── best_cutoff_by_dataset.png
+│   └── các biểu đồ riêng theo từng bộ dữ liệu
+│
+├── results.csv                       # Dữ liệu đo thô
+├── run_experiment.bat                # Chạy toàn bộ quy trình trên Windows
+├── Bao_cao_thi_nghiem_CUTOFF.docx    # Báo cáo thí nghiệm
+└── README.md
+```
 
-Cài thư viện vẽ biểu đồ:
+Một số tệp trong `analysis/` là kết quả bổ sung được lưu kèm báo cáo. Vai trò của từng loại kết quả được giải thích tại [Mục 7](#7-các-tệp-kết-quả).
+
+## 3. Môi trường và yêu cầu
+
+### 3.1. Phần mềm cần có
+
+- **JDK 11 trở lên**: cần có cả `java` và `javac` trong `PATH`.
+- **Python 3**.
+- **Matplotlib** để tạo biểu đồ.
+- Hệ điều hành Windows nếu sử dụng trực tiếp `run_experiment.bat`.
+
+Cài Matplotlib bằng PowerShell:
 
 ```powershell
 python -m pip install matplotlib
 ```
 
-## 3. Chạy trên Windows
+### 3.2. Môi trường đã dùng cho lần chạy báo cáo
 
-Mở PowerShell tại thư mục dự án và chạy:
+| Thành phần | Phiên bản / thông tin |
+|---|---|
+| Hệ điều hành | Windows |
+| PowerShell | Windows PowerShell 5.1 |
+| Java | Java 25.0.2 LTS |
+| Trình biên dịch | `javac 25.0.2` |
+| Python | Python 3.14.7 |
+| Matplotlib | 3.11.2 |
+| CPU | Chưa được ghi nhận trong nhật ký chạy; cần bổ sung |
+| RAM | Chưa được ghi nhận trong nhật ký chạy; cần bổ sung |
+
+CPU và RAM cần được điền trước khi dùng báo cáo như một bản mô tả đầy đủ môi trường phần cứng.
+
+## 4. Tải dự án và chạy thí nghiệm
+
+### 4.1. Tải dự án từ GitHub
+
+Mở PowerShell tại thư mục muốn lưu dự án và chạy:
+
+```powershell
+git clone https://github.com/hoangdinhdat1147/MergeSort-CUTOFF-Experiment.git
+cd MergeSort-CUTOFF-Experiment
+```
+
+### 4.2. Chạy nhanh trên Windows
+
+Tại thư mục gốc của dự án, chạy:
 
 ```powershell
 .\run_experiment.bat
 ```
 
-Nếu cần chạy từng bước:
+Tệp batch tự động thực hiện các công việc sau:
+
+1. Sinh lại các bộ dữ liệu trong `datasets/`.
+2. Tạo thư mục `out/` nếu thư mục chưa tồn tại.
+3. Biên dịch hai tệp Java.
+4. Chạy chương trình benchmark và ghi kết quả vào `results.csv`.
+5. Phân tích kết quả, tạo các bảng thống kê và biểu đồ trong `analysis/`.
+
+Nếu chương trình báo thiếu Matplotlib, cài thư viện theo Mục 3.1 rồi chạy lại.
+
+### 4.3. Chạy từng bước thủ công
+
+Các lệnh dưới đây dành cho Windows PowerShell, thực hiện lần lượt tại thư mục gốc của dự án.
+
+**Bước 1 – Sinh dữ liệu:**
 
 ```powershell
-python scripts/generate_data.py
-mkdir out
-javac -encoding UTF-8 -d out src/MergeSort.java src/Experiment.java
-java -cp out Experiment datasets results.csv
-python scripts/analyze_results.py
+python scripts\generate_data.py
 ```
 
-## 4. Thiết kế thí nghiệm
+**Bước 2 – Tạo thư mục chứa tệp đã biên dịch:**
 
-- CUTOFF: `1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 16, 20, 24, 32, 40, 48, 64`.
-- Kích thước: 10.000; 50.000; 100.000; 250.000 phần tử.
-- Dạng dữ liệu: ngẫu nhiên, đã tăng dần, giảm dần, gần tăng dần.
-- Sinh dữ liệu bằng seed cố định `20261117`.
-- Mỗi cấu hình có 3 lượt warm-up và 11 lần đo chính thức.
-- Thứ tự các giá trị CUTOFF được xáo trộn khi warm-up và ở mỗi lượt đo chính thức.
-- Mảng làm việc được sao chép trước khi bấm giờ; thời gian sao chép không tính vào thời gian sắp xếp.
-- Chỉ đo thời gian thực thi `MergeSort.sort`; không tính thời gian đọc file, sinh dữ liệu hoặc ghi CSV.
-- Kiểm tra kết quả sắp xếp sau mỗi lượt chạy.
-- Tổng số phép đo chính thức: `16 × 18 × 11 = 3.168`.
+```powershell
+New-Item -ItemType Directory -Force -Path out | Out-Null
+```
 
-## 5. Tệp kết quả
+**Bước 3 – Biên dịch mã nguồn Java:**
 
-Sau khi chạy `run_experiment.bat`:
+```powershell
+javac -encoding UTF-8 -d out src\MergeSort.java src\Experiment.java
+```
 
-- `results.csv`: dữ liệu thô, mỗi dòng là một lần chạy.
-- `analysis/summary.csv`: median, mean, độ lệch chuẩn, min và max theo từng bộ dữ liệu và CUTOFF.
-- `analysis/best_cutoff.csv`: CUTOFF có median nhỏ nhất trong miền đã thử cho từng bộ dữ liệu.
-- `analysis/*.png`: đồ thị thời gian theo CUTOFF.
+**Bước 4 – Chạy thí nghiệm:**
 
-Báo cáo cũng kèm các bảng tổng hợp: `analysis/cutoff_7_10_comparison.csv` và `analysis/best_cutoff_from_run.csv`. Hai biểu đồ tổng hợp tương ứng là `analysis/comparison_cutoff_7_10.png` và `analysis/best_cutoff_by_dataset.png`.
+```powershell
+java -cp out Experiment datasets results.csv
+```
 
-## 6. Tóm tắt kết quả lần chạy ngày 17/11/2026
+**Bước 5 – Tổng hợp kết quả và vẽ biểu đồ:**
 
-- So sánh median CUTOFF 7 và 10: CUTOFF 10 thấp hơn trong 10/16 bộ dữ liệu; CUTOFF 7 thấp hơn trong 6/16.
-- Chênh lệch giữa hai giá trị không đồng đều; một số trường hợp gần như ngang nhau.
-- Khi khảo sát 18 giá trị, CUTOFF 64 đứng đầu trong 7/16 bộ dữ liệu. Vì 64 là cận trên của miền đã thử, chưa thể kết luận đó là tối ưu toàn cục.
-- Kết quả phụ thuộc vào dạng dữ liệu và kích thước mảng; không có căn cứ để khẳng định một giá trị luôn tối ưu.
+```powershell
+python scripts\analyze_results.py
+```
 
-## 7. Cách diễn giải
+Sau khi hoàn thành, kiểm tra `results.csv` và thư mục `analysis/`.
 
-Ưu tiên median để mô tả thời gian trung tâm, đồng thời xem độ lệch chuẩn hoặc hệ số biến thiên để đánh giá mức dao động. Không tự ý loại bỏ các lần chạy chậm bất thường khỏi dữ liệu gốc. Nếu các median gần nhau, nên diễn giải là kết quả sát nhau thay vì tuyên bố một phương án thắng rõ rệt. Để xác định vùng tối ưu đầy đủ hơn, cần mở rộng miền thử vượt 64 và chạy lại trên nhiều seed.
+## 5. Thiết kế thí nghiệm
 
-Kết luận chỉ áp dụng cho cài đặt, máy, JDK, hệ điều hành và bộ dữ liệu đã sử dụng. CPU và RAM của máy thực nghiệm cần được bổ sung trong báo cáo vì chưa có trong nhật ký chạy.
+### 5.1. Các giá trị CUTOFF
+
+Thí nghiệm khảo sát 18 giá trị:
+
+```text
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 16, 20, 24, 32, 40, 48, 64
+```
+
+Trong đó, `7` và `10` là hai giá trị được so sánh riêng theo yêu cầu của bài toán.
+
+### 5.2. Kích thước và dạng dữ liệu
+
+Bốn kích thước mảng được sử dụng:
+
+- 10.000 phần tử.
+- 50.000 phần tử.
+- 100.000 phần tử.
+- 250.000 phần tử.
+
+Với mỗi kích thước, chương trình tạo bốn dạng dữ liệu:
+
+| Dạng dữ liệu | Mô tả |
+|---|---|
+| `random` | Các số nguyên được sinh ngẫu nhiên. |
+| `sorted` | Dữ liệu được sắp xếp tăng dần. |
+| `reverse` | Dữ liệu được sắp xếp giảm dần. |
+| `nearly_sorted` | Ban đầu tăng dần, sau đó hoán đổi ngẫu nhiên khoảng 1% số cặp vị trí. |
+
+Dữ liệu được sinh bằng seed cơ sở cố định `20261117`; bộ sinh sử dụng seed kết hợp với kích thước mảng để có thể tái tạo các bộ dữ liệu.
+
+Tổng cộng có:
+
+```text
+4 kích thước × 4 dạng dữ liệu = 16 bộ dữ liệu
+```
+
+### 5.3. Số lượt chạy và thứ tự đo
+
+- Chương trình thực hiện **3 lượt warm-up** trước giai đoạn đo chính thức.
+- Mỗi tổ hợp bộ dữ liệu và giá trị `CUTOFF` được đo **11 lần**.
+- Thứ tự các giá trị `CUTOFF` được xáo trộn trong giai đoạn warm-up và ở mỗi lượt đo chính thức để giảm ảnh hưởng của việc luôn chạy một giá trị trước hoặc sau.
+- Tổng số phép đo chính thức:
+
+```text
+16 bộ dữ liệu × 18 giá trị CUTOFF × 11 lần = 3.168 phép đo
+```
+
+Các lượt warm-up không được tính vào 3.168 phép đo chính thức.
+
+### 5.4. Cách đo thời gian
+
+- Mỗi lượt chạy tạo một bản sao của mảng đầu vào trước khi bắt đầu đo.
+- Thời gian sao chép mảng không được tính vào thời gian sắp xếp.
+- Chỉ đo thời gian thực thi `MergeSort.sort` bằng `System.nanoTime()`.
+- Không tính thời gian đọc tệp, sinh dữ liệu, ghi CSV hoặc kiểm tra kết quả vào khoảng thời gian của thuật toán.
+- Sau khi sắp xếp, chương trình kiểm tra mảng đầu ra đã được sắp xếp tăng dần. Các lượt chạy có kết quả không hợp lệ không được xem là kết quả đúng.
+
+## 6. Kết quả lần chạy ngày 17/11/2026
+
+### 6.1. So sánh CUTOFF 7 và CUTOFF 10
+
+Dựa trên median của 11 lần đo cho từng bộ dữ liệu:
+
+- `CUTOFF = 10` có median thấp hơn trong **10/16 bộ dữ liệu**.
+- `CUTOFF = 7` có median thấp hơn trong **6/16 bộ dữ liệu**.
+- Mức chênh lệch thay đổi theo kích thước và dạng dữ liệu; có trường hợp hai median rất gần nhau.
+
+Vì vậy, kết quả này không chứng minh rằng `CUTOFF = 10` luôn nhanh hơn `CUTOFF = 7`. Cần xem xét cả độ lớn chênh lệch và mức dao động giữa các lần đo.
+
+### 6.2. Khảo sát toàn bộ miền CUTOFF
+
+Khi so sánh 18 giá trị đã thử, `CUTOFF = 64` có median thấp nhất trong **7/16 bộ dữ liệu**. Tuy nhiên, 64 cũng là giá trị lớn nhất trong miền khảo sát. Do đó, kết quả chỉ cho biết 64 là giá trị tốt nhất trong các giá trị đã thử ở những bộ dữ liệu tương ứng; chưa thể kết luận đây là CUTOFF tối ưu toàn cục.
+
+Các kết quả tốt nhất của từng bộ dữ liệu được lưu trong `analysis/best_cutoff.csv` và `analysis/best_cutoff_from_run.csv`.
+
+### 6.3. Biểu đồ tổng hợp
+
+- `analysis/comparison_cutoff_7_10.png`: so sánh median của CUTOFF 7 và 10 trên 16 bộ dữ liệu.
+- `analysis/best_cutoff_by_dataset.png`: thể hiện CUTOFF có median thấp nhất trong miền đã thử đối với từng bộ dữ liệu.
+
+Ngoài ra, `analysis/` chứa biểu đồ thời gian theo CUTOFF riêng cho từng bộ dữ liệu.
+
+## 7. Các tệp kết quả
+
+| Tệp | Nội dung | Cách tạo |
+|---|---|---|
+| `results.csv` | Dữ liệu thô; mỗi dòng là một lần đo, gồm bộ dữ liệu, kích thước, CUTOFF, số lần lặp, thời gian và trạng thái kiểm tra. | `Experiment.java` |
+| `analysis/summary.csv` | Số lần đo, median, mean, độ lệch chuẩn, min và max theo từng bộ dữ liệu và CUTOFF. | `scripts/analyze_results.py` |
+| `analysis/best_cutoff.csv` | Giá trị có median nhỏ nhất trong miền CUTOFF đã thử cho từng bộ dữ liệu. | `scripts/analyze_results.py` |
+| `analysis/*.png` | Biểu đồ median thời gian theo CUTOFF cho từng bộ dữ liệu. | `scripts/analyze_results.py` |
+| `analysis/cutoff_7_10_comparison.csv` | Bảng so sánh median và độ lệch chuẩn của CUTOFF 7 và 10. | Tệp tổng hợp bổ sung cho báo cáo |
+| `analysis/best_cutoff_from_run.csv` | Bảng CUTOFF tốt nhất quan sát được trong lần chạy được báo cáo. | Tệp tổng hợp bổ sung cho báo cáo |
+| `analysis/comparison_cutoff_7_10.png` | Biểu đồ tổng hợp so sánh CUTOFF 7 và 10. | Tệp biểu đồ bổ sung cho báo cáo |
+| `analysis/best_cutoff_by_dataset.png` | Biểu đồ tổng hợp CUTOFF tốt nhất theo bộ dữ liệu. | Tệp biểu đồ bổ sung cho báo cáo |
+
+**Lưu ý:** `scripts/analyze_results.py` tự động tạo `summary.csv`, `best_cutoff.csv` và các biểu đồ riêng theo bộ dữ liệu. Các bảng và biểu đồ tổng hợp bổ sung nêu trên được lưu kèm repository; chúng không được script phân tích hiện tại tự động tạo lại. Nếu thay đổi dữ liệu hoặc chạy benchmark mới, cần cập nhật các tệp tổng hợp này trước khi dùng chúng để mô tả lần chạy mới.
+
+Báo cáo chi tiết: [`Bao_cao_thi_nghiem_CUTOFF.docx`](Bao_cao_thi_nghiem_CUTOFF.docx).
+
+## 8. Cách phân tích và diễn giải
+
+- Dùng **median** làm số đo trung tâm vì median ít bị kéo lệch bởi một vài lần chạy bất thường hơn mean.
+- Xem thêm **mean** và **độ lệch chuẩn** để hiểu mức dao động của thời gian chạy.
+- Không tự ý xóa các lần chạy chậm bất thường khỏi `results.csv`. Nếu cần, có thể thực hiện phân tích độ nhạy riêng, nhưng phải giữ nguyên dữ liệu gốc và trình bày rõ cách phân tích.
+- Khi hai median gần nhau, nên mô tả kết quả là sát nhau; không nên tuyên bố một phương án thắng rõ rệt chỉ dựa trên chênh lệch rất nhỏ.
+- Kết quả đo benchmark đơn lẻ không tự chứng minh khác biệt có ý nghĩa thống kê. README và báo cáo này không đưa ra kết luận kiểm định thống kê.
+- Muốn khảo sát vùng tối ưu đầy đủ hơn, cần mở rộng miền CUTOFF vượt quá 64 và chạy lại trên nhiều seed dữ liệu.
+
+## 9. Giới hạn và lưu ý khi tái lập
+
+Kết quả chỉ áp dụng cho cài đặt Mergesort, bộ dữ liệu, cấu hình CUTOFF, máy tính, JDK, hệ điều hành và điều kiện chạy đã dùng trong thí nghiệm. Thời gian benchmark có thể thay đổi do tải CPU, các tiến trình chạy nền, cơ chế JIT của JVM và khác biệt phần cứng.
+
+Để các lần chạy có thể so sánh tốt hơn:
+
+1. Dùng cùng phiên bản mã nguồn và cùng bộ dữ liệu.
+2. Đóng các ứng dụng tiêu thụ CPU lớn trong lúc benchmark.
+3. Tránh chạy nhiều chương trình benchmark đồng thời.
+4. Nếu dùng laptop, nên cắm sạc và giữ cùng chế độ nguồn giữa các lần chạy.
+5. Ghi lại CPU, dung lượng RAM, hệ điều hành và phiên bản JDK khi thu thập kết quả.
+
+Dữ liệu sinh bằng seed cố định giúp tái tạo đầu vào, nhưng không đảm bảo thời gian chạy sẽ giống hệt nhau giữa các lần thực nghiệm hoặc trên các máy khác nhau.
+
+---
+
+**Trạng thái báo cáo:** kết quả lần chạy ngày 17/11/2026. Thông tin CPU và RAM của máy thực nghiệm chưa được ghi nhận và cần được bổ sung trước khi nộp báo cáo chính thức.
