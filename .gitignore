@@ -4,3 +4,5 @@ __pycache__/
 .idea/
 .vscode/
 *.log
+results_old_*.csv
+analysis_old_*/

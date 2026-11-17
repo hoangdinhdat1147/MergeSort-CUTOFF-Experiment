@@ -1,0 +1,17 @@
+HUONG DAN CAP NHAT DU AN TREN MAY VA GITHUB
+
+1. Giai nen MergeSort_CUTOFF_Project_Update.zip vao thu muc tam.
+2. Sao chep cac tep/folder trong goi cap nhat vao thu muc goc MergeSort_CUTOFF_Project, cho phep ghi de README.md va Bao_cao_thi_nghiem_CUTOFF.docx.
+3. Goi cap nhat khong chua src/Experiment.java de tranh ghi de phien ban 3 warm-up, 11 lan do va shuffle hien dang co tren may cua ban.
+4. Trong PowerShell, di den thu muc goc cua project va chay:
+
+   git status
+   git add README.md Bao_cao_thi_nghiem_CUTOFF.docx src/Experiment.java results.csv analysis/
+   git status
+   git commit -m "Finalize 11-run CUTOFF experiment report"
+   git push
+
+5. Truoc khi commit, kiem tra analysis/summary.csv, analysis/best_cutoff.csv va cac PNG la ket qua tu lan chay 11-repeat tren may cua ban. Goi cap nhat chi bo sung cac bang/anh tong hop tu ket qua da duoc cung cap trong cuoc tro chuyen; no khong thay the results.csv va summary.csv day du tren may.
+6. Khong can git add cac tep backup results_old_*.csv hoac analysis_old_*.
+
+Luu y: CPU va RAM chua co trong nhat ky. Hay bo sung hai thong so nay vao trang bia/muc Moi truong thuc nghiem truoc khi nop.
