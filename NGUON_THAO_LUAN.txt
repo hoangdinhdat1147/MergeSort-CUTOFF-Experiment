@@ -1,0 +1,7 @@
+CƠ SỞ TÀI LIỆU ĐÃ DÙNG
+1. 21ElementarySorts.pdf: nội dung Insertion Sort.
+2. 14AnalysisOfAlgorithms.pdf: scientific method, reproducibility, empirical analysis, data analysis.
+3. Algorithms, 4th Edition, Robert Sedgewick & Kevin Wayne:
+   - Section 2.2, Algorithm 2.4: Top-down Mergesort.
+   - Section 2.3, đoạn "Cutoff to insertion sort": cutoff là tham số phụ thuộc hệ thống; sách nêu khoảng 5–15 là vùng thường hoạt động tốt trong ngữ cảnh Quicksort. Đây là tham khảo định hướng, KHÔNG phải kết quả thực nghiệm cho Mergesort trên máy sinh viên.
+4. Bài yêu cầu của giảng viên: khảo sát cutoff cho cài đặt Mergesort tự dựng.
