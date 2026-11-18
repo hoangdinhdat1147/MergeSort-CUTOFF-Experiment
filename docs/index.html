@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Dashboard tương tác trình bày kết quả thí nghiệm CUTOFF cho Top-down Mergesort từ dữ liệu CSV của repository.">
+  <meta name="theme-color" content="#10243a">
+  <title>MergeSort CUTOFF — Dashboard kết quả</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      --ink: #17283c;
+      --muted: #63758a;
+      --line: #dce4ec;
+      --paper: #f4f7fb;
+      --card: #ffffff;
+      --navy: #10243a;
+      --blue: #2767a8;
+      --teal: #16877d;
+      --orange: #d97732;
+      --red: #b84b4b;
+      --shadow: 0 12px 32px rgba(16, 36, 58, .07);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    a { color: inherit; }
+    .topbar {
+      background: var(--navy);
+      color: #fff;
+      padding: 34px 22px 42px;
+      border-bottom: 4px solid #2f8d91;
+    }
+    .top-inner, main, footer { max-width: 1200px; margin: 0 auto; }
+    .eyebrow {
+      color: #9fc5d8; font-size: .76rem; font-weight: 750;
+      letter-spacing: .13em; text-transform: uppercase;
+    }
+    h1 { margin: 9px 0 8px; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.12; letter-spacing: -.035em; }
+    .subtitle { color: #d2deea; max-width: 790px; margin: 0; font-size: 1rem; }
+    .hero-meta { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 20px; }
+    .hero-meta span {
+      border: 1px solid rgba(220,235,247,.22); background: rgba(255,255,255,.07);
+      padding: 6px 11px; border-radius: 999px; font-size: .8rem; color: #e6eef6;
+    }
+    main { padding: 24px 20px 48px; }
+    .status-line { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin: 2px 0 18px; }
+    .status { display:flex; align-items:center; gap:9px; color:var(--muted); font-size:.88rem; }
+    .status-dot { width:9px; height:9px; border-radius:50%; background:#d39a3b; box-shadow:0 0 0 4px #f7ead3; }
+    .status.ready .status-dot { background:#22977d; box-shadow:0 0 0 4px #d9f1e9; }
+    .source-links { display:flex; gap:14px; flex-wrap:wrap; font-size:.84rem; }
+    .source-links a { color:var(--blue); text-decoration:none; font-weight:650; }
+    .source-links a:hover { text-decoration:underline; }
+    .notice {
+      display:none; padding:13px 15px; border:1px solid #f0c7a7; border-radius:12px;
+      background:#fff7ef; color:#82451e; margin:0 0 18px; font-size:.9rem;
+    }
+    .notice.show { display:block; }
+    .kpis { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:13px; margin-bottom:20px; }
+    .kpi, .card {
+      background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);
+    }
+    .kpi { padding:17px 18px 16px; min-height:108px; }
+    .kpi-label { color:var(--muted); font-size:.82rem; font-weight:650; }
+    .kpi-value { font-size:1.9rem; font-weight:780; letter-spacing:-.035em; margin-top:3px; line-height:1.2; }
+    .kpi-foot { color:#8290a1; font-size:.75rem; margin-top:5px; }
+    .section-head { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin:31px 2px 13px; }
+    .section-head h2 { margin:0; font-size:1.23rem; letter-spacing:-.02em; }
+    .section-head p { color:var(--muted); margin:3px 0 0; font-size:.87rem; }
+    .card { padding:18px; }
+    .card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:8px; }
+    .card-title { font-size:1rem; font-weight:750; margin:0; }
+    .card-desc { margin:4px 0 0; color:var(--muted); font-size:.82rem; }
+    .control-row { display:flex; align-items:flex-end; flex-wrap:wrap; gap:12px; margin:14px 0 8px; }
+    .control { display:flex; flex-direction:column; gap:5px; min-width:155px; }
+    .control label { font-size:.76rem; font-weight:700; color:var(--muted); }
+    select, button, input[type="range"] { font:inherit; }
+    select {
+      border:1px solid #ccd7e2; border-radius:10px; padding:9px 11px; color:var(--ink);
+      background:#fff; min-height:39px;
+    }
+    button {
+      border:1px solid #cbd7e3; background:#fff; color:var(--ink); border-radius:10px;
+      padding:9px 13px; min-height:39px; cursor:pointer; font-weight:700; font-size:.84rem;
+      transition:transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    button:hover { background:#f0f5fa; border-color:#9db2c6; }
+    button:active { transform:translateY(1px); }
+    button.primary { background:var(--navy); color:#fff; border-color:var(--navy); }
+    button.primary:hover { background:#1b3b5a; }
+    button:disabled { opacity:.55; cursor:not-allowed; }
+    .range-wrap { display:flex; align-items:center; gap:10px; min-width:230px; flex:1; }
+    input[type="range"] { width:100%; accent-color:var(--blue); cursor:pointer; }
+    .range-value { min-width:84px; text-align:right; font-variant-numeric:tabular-nums; font-size:.83rem; font-weight:750; }
+    .toggle { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:.82rem; font-weight:650; padding:8px 2px; }
+    .toggle input { accent-color:var(--blue); width:16px; height:16px; }
+    .chart { width:100%; min-height:390px; }
+    #runtimeChart { min-height:470px; }
+    .chart-foot { border-top:1px solid #edf1f5; margin-top:5px; padding-top:11px; color:var(--muted); font-size:.79rem; }
+    .two-col { display:grid; grid-template-columns:1.15fr .85fr; gap:16px; }
+    .legend-note { display:flex; flex-wrap:wrap; gap:14px; color:var(--muted); font-size:.79rem; margin:5px 0 0; }
+    .legend-note span { display:flex; align-items:center; gap:6px; }
+    .swatch { display:inline-block; width:9px; height:9px; border-radius:3px; }
+    .table-wrap { overflow:auto; border:1px solid var(--line); border-radius:12px; margin-top:12px; }
+    table { border-collapse:collapse; width:100%; font-size:.82rem; font-variant-numeric:tabular-nums; }
+    thead th { position:sticky; top:0; z-index:1; background:#edf3f8; color:#334a61; font-weight:750; text-align:left; white-space:nowrap; }
+    th, td { padding:10px 12px; border-bottom:1px solid #e8edf2; }
+    tbody tr:nth-child(even) { background:#f8fafc; }
+    tbody tr:last-child td { border-bottom:0; }
+    td.num, th.num { text-align:right; }
+    .pill { display:inline-block; padding:3px 8px; border-radius:999px; font-size:.73rem; font-weight:750; }
+    .pill.seven { background:#fff0df; color:#99511c; }
+    .pill.ten { background:#dcf3ec; color:#146b5d; }
+    .pill.boundary { background:#fff0df; color:#99511c; }
+    .table-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:18px; }
+    .table-toolbar input { width:min(100%,300px); border:1px solid #ccd7e2; border-radius:10px; padding:9px 11px; }
+    .small-note { font-size:.78rem; color:var(--muted); }
+    .method-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .method { border:1px solid var(--line); background:#fbfcfe; border-radius:13px; padding:14px; }
+    .method strong { display:block; font-size:.85rem; margin-bottom:4px; }
+    .method p { margin:0; font-size:.8rem; color:var(--muted); }
+    footer { border-top:1px solid var(--line); padding:20px; color:var(--muted); font-size:.8rem; }
+    footer a { color:var(--blue); text-decoration:none; }
+    .mono { font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    @media (max-width:850px) {
+      .kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .two-col { grid-template-columns:1fr; }
+      .method-grid { grid-template-columns:1fr; }
+    }
+    @media (max-width:560px) {
+      .topbar { padding:27px 17px 32px; }
+      main { padding:18px 12px 35px; }
+      .kpis { gap:9px; }
+      .kpi { padding:13px; min-height:96px; }
+      .kpi-value { font-size:1.55rem; }
+      .card { padding:13px; }
+      .control { min-width:130px; flex:1; }
+      #runtimeChart { min-height:430px; }
+      .chart { min-height:350px; }
+      .section-head { display:block; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="top-inner">
+      <div class="eyebrow">Báo cáo thí nghiệm · Algorithms</div>
+      <h1>Khảo sát ngưỡng CUTOFF cho Top-down Mergesort</h1>
+      <p class="subtitle">Đối chiếu thời gian chạy của Mergesort kết hợp Insertion Sort trên các ngưỡng CUTOFF, kích thước mảng và dạng dữ liệu khác nhau.</p>
+      <div class="hero-meta">
+        <span>16 bộ dữ liệu</span><span>18 giá trị CUTOFF</span><span>11 lần đo / cấu hình</span><span>Median ± 1 SD</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="status-line">
+      <div class="status" id="loadStatus"><span class="status-dot"></span><span id="statusText">Đang tải dữ liệu CSV từ repository…</span></div>
+      <div class="source-links">
+        <a href="https://github.com/hoangdinhdat1147/MergeSort-CUTOFF-Experiment" target="_blank" rel="noopener">Mã nguồn trên GitHub ↗</a>
+        <a href="https://github.com/hoangdinhdat1147/MergeSort-CUTOFF-Experiment/tree/main/analysis" target="_blank" rel="noopener">Thư mục dữ liệu ↗</a>
+      </div>
+    </div>
+    <div class="notice" id="errorNotice"></div>
+
+    <section class="kpis" aria-label="Tóm tắt thí nghiệm">
+      <div class="kpi"><div class="kpi-label">Bộ dữ liệu</div><div class="kpi-value" id="kpiDatasets">—</div><div class="kpi-foot">4 dạng dữ liệu × 4 kích thước</div></div>
+      <div class="kpi"><div class="kpi-label">Giá trị CUTOFF</div><div class="kpi-value" id="kpiCutoffs">—</div><div class="kpi-foot">Từ 1 đến 64, gồm 18 mức</div></div>
+      <div class="kpi"><div class="kpi-label">Lần đo chính thức</div><div class="kpi-value" id="kpiRuns">—</div><div class="kpi-foot">Tổng số phép đo trong summary.csv</div></div>
+      <div class="kpi"><div class="kpi-label">Lần lặp / cấu hình</div><div class="kpi-value" id="kpiRepeats">—</div><div class="kpi-foot">Ngoài 3 lượt warm-up</div></div>
+    </section>
+
+    <div class="section-head">
+      <div><h2>1. Median thời gian chạy theo CUTOFF</h2><p>Chọn dạng dữ liệu và kích thước mảng. Nhấn Phát để chuyển lần lượt qua bốn kích thước.</p></div>
+    </div>
+    <section class="card">
+      <div class="card-head">
+        <div><h3 class="card-title">Thời gian sắp xếp</h3><p class="card-desc">Mỗi điểm là median của 11 lần đo; thanh sai số biểu thị ±1 độ lệch chuẩn.</p></div>
+      </div>
+      <div class="control-row">
+        <div class="control">
+          <label for="distributionSelect">Dạng dữ liệu</label>
+          <select id="distributionSelect">
+            <option value="all">Tất cả các dạng</option>
+            <option value="random">Ngẫu nhiên</option>
+            <option value="sorted">Tăng dần</option>
+            <option value="reverse">Giảm dần</option>
+            <option value="nearly_sorted">Gần tăng dần</option>
+          </select>
+        </div>
+        <div class="control" style="min-width:118px">
+          <label for="speedSelect">Tốc độ chuyển</label>
+          <select id="speedSelect"><option value="1800">Chậm</option><option value="1100" selected>Vừa</option><option value="650">Nhanh</option></select>
+        </div>
+        <button class="primary" id="playButton" disabled>▶ Phát</button>
+        <button id="pauseButton" disabled>Ⅱ Tạm dừng</button>
+        <label class="toggle"><input id="errorToggle" type="checkbox" checked> Hiện ±1 SD</label>
+      </div>
+      <div class="control-row" style="align-items:center;margin-top:5px">
+        <label for="sizeSlider" style="font-size:.78rem;color:var(--muted);font-weight:700;white-space:nowrap">Kích thước mảng</label>
+        <div class="range-wrap"><input id="sizeSlider" type="range" min="0" max="3" step="1" value="0" disabled><span class="range-value" id="sizeValue">10.000</span></div>
+      </div>
+      <div id="runtimeChart" class="chart" aria-label="Biểu đồ median thời gian chạy theo CUTOFF"></div>
+      <div class="chart-foot">Ngôi sao đánh dấu CUTOFF có median thấp nhất trong 18 giá trị đã thử cho từng đường. Chuyển động chỉ thay đổi kích thước đầu vào đang được hiển thị; không tạo hoặc nội suy số đo.</div>
+    </section>
+
+    <div class="section-head">
+      <div><h2>2. So sánh CUTOFF = 7 và CUTOFF = 10</h2><p>Giá trị âm: median của CUTOFF 10 thấp hơn. Giá trị dương: median của CUTOFF 7 thấp hơn.</p></div>
+    </div>
+    <section class="card">
+      <div id="comparisonChart" class="chart" aria-label="Biểu đồ chênh lệch median giữa CUTOFF 7 và 10"></div>
+      <div class="legend-note"><span><i class="swatch" style="background:#16877d"></i>CUTOFF 10 có median thấp hơn</span><span><i class="swatch" style="background:#d97732"></i>CUTOFF 7 có median thấp hơn</span></div>
+    </section>
+
+    <div class="section-head">
+      <div><h2>3. CUTOFF tốt nhất trong miền đã thử</h2><p>Ô màu thể hiện CUTOFF có median thấp nhất ở từng dạng dữ liệu và kích thước mảng.</p></div>
+    </div>
+    <section class="card">
+      <div id="bestChart" class="chart" aria-label="Bản đồ nhiệt CUTOFF tốt nhất theo bộ dữ liệu"></div>
+      <div class="chart-foot">CUTOFF = 64 là giới hạn trên của miền khảo sát. Những ô có giá trị 64 không chứng minh rằng 64 là tối ưu toàn cục; cần thử thêm các ngưỡng lớn hơn để kiểm tra.</div>
+    </section>
+
+    <div class="section-head">
+      <div><h2>4. Bảng số liệu</h2><p>Tra cứu kết quả tốt nhất và số liệu so sánh 7/10 cho từng bộ dữ liệu.</p></div>
+    </div>
+    <section class="card">
+      <div class="table-toolbar">
+        <div><strong style="font-size:.92rem">CUTOFF có median thấp nhất</strong><div class="small-note">Chỉ xét 18 giá trị CUTOFF đã đo.</div></div>
+        <input id="bestSearch" type="search" placeholder="Lọc theo dạng dữ liệu hoặc kích thước…" aria-label="Lọc bảng kết quả tốt nhất">
+      </div>
+      <div class="table-wrap">
+        <table id="bestTable"><thead><tr><th>Dạng dữ liệu</th><th class="num">N</th><th class="num">CUTOFF</th><th class="num">Median (ms)</th><th>Ghi chú</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="table-toolbar" style="margin-top:25px">
+        <div><strong style="font-size:.92rem">Đối chiếu CUTOFF 7 và 10</strong><div class="small-note">SD là độ lệch chuẩn của 11 lần đo.</div></div>
+      </div>
+      <div class="table-wrap">
+        <table id="compareTable"><thead><tr><th>Dạng dữ liệu</th><th class="num">N</th><th class="num">Median 7 (ms)</th><th class="num">Median 10 (ms)</th><th class="num">Chênh lệch (%)</th><th>Kết quả median thấp hơn</th></tr></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <div class="section-head"><div><h2>5. Cách đọc kết quả</h2><p>Các biểu đồ sử dụng trực tiếp các thống kê đã lưu trong repository.</p></div></div>
+    <section class="method-grid">
+      <div class="method"><strong>Median</strong><p>Trung vị của 11 lần đo cho mỗi bộ dữ liệu và mỗi giá trị CUTOFF.</p></div>
+      <div class="method"><strong>±1 SD</strong><p>Thanh sai số biểu thị một độ lệch chuẩn; đây không phải khoảng tin cậy 95%.</p></div>
+      <div class="method"><strong>Miền khảo sát</strong><p>“Tốt nhất” chỉ có nghĩa là thấp nhất trong 18 giá trị CUTOFF đã thử.</p></div>
+    </section>
+  </main>
+
+  <footer>
+    <div>Dashboard đọc các bản CSV trong docs/data/ (được sao chép từ analysis/ khi cài đặt); không chạy lại thuật toán và không thay đổi số liệu.</div>
+    <div style="margin-top:5px">Nguồn: <a href="https://github.com/hoangdinhdat1147/MergeSort-CUTOFF-Experiment/tree/main/analysis" target="_blank" rel="noopener">analysis/</a> · <a href="https://github.com/hoangdinhdat1147/MergeSort-CUTOFF-Experiment" target="_blank" rel="noopener">MergeSort-CUTOFF-Experiment</a></div>
+  </footer>
+
+<script>
+(() => {
+  'use strict';
+  const OWNER = 'hoangdinhdat1147';
+  const REPO = 'MergeSort-CUTOFF-Experiment';
+  const BRANCH = 'main';
+  const DATA_BASE = 'data/';
+  const FILES = {
+    summary: 'summary.csv',
+    compare: 'cutoff_7_10_comparison.csv',
+    best: 'best_cutoff_from_run.csv'
+  };
+  const DISTRIBUTIONS = [
+    { id: 'random', label: 'Ngẫu nhiên', color: '#2767a8' },
+    { id: 'sorted', label: 'Tăng dần', color: '#16877d' },
+    { id: 'reverse', label: 'Giảm dần', color: '#d97732' },
+    { id: 'nearly_sorted', label: 'Gần tăng dần', color: '#7856a8' }
+  ];
+  const SIZES = [10000, 50000, 100000, 250000];
+  const CUTOFFS = [1,2,3,4,5,6,7,8,9,10,12,16,20,24,32,40,48,64];
+  const nf0 = new Intl.NumberFormat('vi-VN');
+  const nf4 = new Intl.NumberFormat('vi-VN', {minimumFractionDigits:4, maximumFractionDigits:4});
+  const byId = id => document.getElementById(id);
+  let summaryRows = [], compareRows = [], bestRows = [];
+  let plotReady = false, animationTimer = null, animationIndex = 0;
+
+  function parseCSV(text) {
+    const rows = [];
+    let row = [], field = '', quoted = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (quoted) {
+        if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+        else if (ch === '"') quoted = false;
+        else field += ch;
+      } else if (ch === '"') quoted = true;
+      else if (ch === ',') { row.push(field); field = ''; }
+      else if (ch === '\n') { row.push(field.replace(/\r$/, '')); rows.push(row); row = []; field = ''; }
+      else field += ch;
+    }
+    if (field.length || row.length) { row.push(field.replace(/\r$/, '')); rows.push(row); }
+    if (!rows.length) return [];
+    const headers = rows.shift().map((h, i) => i === 0 ? h.replace(/^\uFEFF/, '').trim() : h.trim());
+    return rows.filter(r => r.some(v => v !== '')).map(r => Object.fromEntries(headers.map((h, i) => [h, (r[i] ?? '').trim()])));
+  }
+  async function loadCSV(file) {
+    const response = await fetch(DATA_BASE + file + '?v=' + Date.now(), {cache: 'no-store'});
+    if (!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
+    return parseCSV(await response.text());
+  }
+  function distributionOf(dataset) {
+    const stem = dataset.replace(/\.txt$/i, '');
+    const match = stem.match(/^(random|sorted|reverse|nearly_sorted)_(\d+)$/);
+    if (!match) throw new Error(`Tên bộ dữ liệu không hợp lệ: ${dataset}`);
+    return { type: match[1], n: Number(match[2]) };
+  }
+  function labelOf(dataset) {
+    const info = distributionOf(dataset);
+    const d = DISTRIBUTIONS.find(x => x.id === info.type);
+    return `${d.label} · ${nf0.format(info.n)}`;
+  }
+  function sortedDatasets(rows) {
+    const order = Object.fromEntries(DISTRIBUTIONS.map((d, i) => [d.id, i]));
+    return [...rows].sort((a,b) => {
+      const da = distributionOf(a.dataset), db = distributionOf(b.dataset);
+      return order[da.type] - order[db.type] || da.n - db.n;
+    });
+  }
+  function showError(message) {
+    byId('errorNotice').textContent = message;
+    byId('errorNotice').classList.add('show');
+    byId('loadStatus').classList.remove('ready');
+    byId('statusText').textContent = 'Không tải được dữ liệu';
+  }
+  function updateKpis() {
+    const datasets = new Set(summaryRows.map(r => r.dataset)).size;
+    const cutoffs = new Set(summaryRows.map(r => Number(r.cutoff))).size;
+    const runs = summaryRows.reduce((sum, r) => sum + Number(r.runs), 0);
+    const repeats = [...new Set(summaryRows.map(r => Number(r.runs)))];
+    byId('kpiDatasets').textContent = nf0.format(datasets);
+    byId('kpiCutoffs').textContent = nf0.format(cutoffs);
+    byId('kpiRuns').textContent = nf0.format(runs);
+    byId('kpiRepeats').textContent = repeats.length === 1 ? nf0.format(repeats[0]) : repeats.join(' / ');
+    if (datasets !== 16 || cutoffs !== 18 || runs !== 3168) {
+      byId('errorNotice').textContent = `Lưu ý: CSV hiện có ${datasets} bộ dữ liệu, ${cutoffs} giá trị CUTOFF và ${nf0.format(runs)} phép đo; khác với thiết kế 16 × 18 × 11 = 3.168. Dashboard sẽ hiển thị đúng số liệu đang có trong CSV.`;
+      byId('errorNotice').classList.add('show');
+    }
+  }
+  function tracesForSize(n) {
+    return DISTRIBUTIONS.map(dist => {
+      const rows = summaryRows.filter(r => r.dist === dist.id && r.n === n).sort((a,b) => a.cutoff - b.cutoff);
+      const best = rows.reduce((acc, r) => !acc || r.median_ms < acc.median_ms ? r : acc, null);
+      return {
+        type: 'scatter', mode: 'lines+markers', name: dist.label,
+        x: rows.map(r => r.cutoff), y: rows.map(r => r.median_ms),
+        line: {color: dist.color, width: 2.5},
+        marker: {color: rows.map(r => best && r.cutoff === best.cutoff ? '#d97732' : dist.color),
+                 size: rows.map(r => best && r.cutoff === best.cutoff ? 13 : 8),
+                 symbol: rows.map(r => best && r.cutoff === best.cutoff ? 'star' : 'circle'),
+                 line: {color:'#ffffff', width:1.2}},
+        error_y: {type:'data', array: rows.map(r => r.stdev_ms), visible:byId('errorToggle').checked,
+                  color:dist.color, thickness:1.15, width:3},
+        customdata: rows.map(r => [r.mean_ms, r.stdev_ms, r.min_ms, r.max_ms, r.runs]),
+        hovertemplate: '<b>%{fullData.name}</b><br>CUTOFF: %{x}<br>Median: %{y:.4f} ms<br>Mean: %{customdata[0]:.4f} ms<br>SD: %{customdata[1]:.4f} ms<br>Min: %{customdata[2]:.4f} ms<br>Max: %{customdata[3]:.4f} ms<br>Số lần đo: %{customdata[4]}<extra></extra>',
+      };
+    });
+  }
+  function runtimeLayout(n) {
+    return {
+      title: {text:`Median thời gian chạy · N = ${nf0.format(n)}`, x:0.02, xanchor:'left', font:{size:17,color:'#17283c'}},
+      paper_bgcolor:'#ffffff', plot_bgcolor:'#ffffff',
+      margin:{l:58,r:25,t:65,b:65},
+      xaxis:{title:'Giá trị CUTOFF', tickmode:'array', tickvals:CUTOFFS, gridcolor:'#e8edf2', zeroline:false},
+      yaxis:{title:'Median thời gian chạy (ms)', rangemode:'tozero', gridcolor:'#e8edf2', zeroline:false},
+      legend:{orientation:'h', y:-0.23, x:0},
+      hovermode:'closest',
+      font:{family:'Inter, Segoe UI, sans-serif',color:'#33465a',size:12},
+      annotations:[{text:'Ngôi sao: median thấp nhất trong 18 CUTOFF đã thử',xref:'paper',yref:'paper',x:1,y:1.12,xanchor:'right',showarrow:false,font:{size:10,color:'#68798c'}}]
+    };
+  }
+  async function createRuntimeChart() {
+    const initial = tracesForSize(SIZES[0]);
+    await Plotly.newPlot('runtimeChart', initial, runtimeLayout(SIZES[0]), {
+      responsive:true, displaylogo:false, modeBarButtonsToRemove:['lasso2d','select2d','autoScale2d']
+    });
+    const frames = SIZES.map(n => ({name:String(n), data:tracesForSize(n), traces:[0,1,2,3], layout:{title:{text:`Median thời gian chạy · N = ${nf0.format(n)}`}}}));
+    await Plotly.addFrames('runtimeChart', frames);
+    applyDistributionVisibility();
+    plotReady = true;
+    byId('playButton').disabled = false;
+    byId('pauseButton').disabled = false;
+    byId('sizeSlider').disabled = false;
+  }
+  function applyDistributionVisibility() {
+    if (!plotReady) return;
+    const selected = byId('distributionSelect').value;
+    const visible = DISTRIBUTIONS.map(d => selected === 'all' || selected === d.id);
+    Plotly.restyle('runtimeChart', {visible}, [0,1,2,3]);
+  }
+  function updateSize(index, animated=true) {
+    animationIndex = Math.max(0, Math.min(SIZES.length - 1, Number(index)));
+    const n = SIZES[animationIndex];
+    byId('sizeSlider').value = animationIndex;
+    byId('sizeValue').textContent = nf0.format(n);
+    if (plotReady) {
+      const opts = animated
+        ? {mode:'immediate', transition:{duration:420,easing:'cubic-in-out'}, frame:{duration:0,redraw:true}}
+        : {mode:'immediate', transition:{duration:0}, frame:{duration:0,redraw:true}};
+      const animation = Plotly.animate('runtimeChart', [String(n)], opts);
+      Promise.resolve(animation).then(() => {
+        applyDistributionVisibility();
+        Plotly.restyle('runtimeChart', {'error_y.visible':byId('errorToggle').checked}, [0,1,2,3]);
+      });
+    }
+  }
+  function stopAnimation() {
+    if (animationTimer) window.clearTimeout(animationTimer);
+    animationTimer = null;
+    byId('playButton').textContent = '▶ Phát';
+  }
+  function playNext() {
+    if (!animationTimer && byId('playButton').dataset.playing !== 'true') return;
+    const next = (animationIndex + 1) % SIZES.length;
+    updateSize(next, true);
+    const delay = Number(byId('speedSelect').value);
+    animationTimer = window.setTimeout(() => { animationTimer = null; playNext(); }, delay);
+  }
+  function startAnimation() {
+    if (byId('playButton').dataset.playing === 'true') return;
+    byId('playButton').dataset.playing = 'true';
+    byId('playButton').textContent = '▶ Đang phát';
+    animationTimer = window.setTimeout(() => { animationTimer = null; playNext(); }, 250);
+  }
+  function pauseAnimation() {
+    byId('playButton').dataset.playing = 'false';
+    stopAnimation();
+  }
+  function createComparisonChart() {
+    const rows = sortedDatasets(compareRows);
+    const labels = rows.map(r => labelOf(r.dataset));
+    const diffs = rows.map(r => r.diff);
+    const colors = diffs.map(v => v < 0 ? '#16877d' : v > 0 ? '#d97732' : '#64748b');
+    const trace = {
+      type:'bar', orientation:'h', x:diffs, y:labels,
+      marker:{color:colors, line:{color:'#ffffff',width:1}},
+      customdata:rows.map(r => [r.m7,r.m10,r.sd7,r.sd10,r.lower]),
+      text:diffs.map(v => `${v > 0 ? '+' : ''}${v.toFixed(2)}%`),
+      textposition:'outside', cliponaxis:false,
+      hovertemplate:'<b>%{y}</b><br>Chênh lệch: %{x:.2f}%<br>Median CUTOFF 7: %{customdata[0]:.4f} ms<br>Median CUTOFF 10: %{customdata[1]:.4f} ms<br>SD CUTOFF 7: %{customdata[2]:.4f} ms<br>SD CUTOFF 10: %{customdata[3]:.4f} ms<br>Median thấp hơn: %{customdata[4]}<extra></extra>'
+    };
+    Plotly.newPlot('comparisonChart', [trace], {
+      paper_bgcolor:'#ffffff',plot_bgcolor:'#ffffff',margin:{l:190,r:75,t:25,b:65},
+      xaxis:{title:'(Median 10 − Median 7) / Median 7 × 100 (%)',zeroline:false,gridcolor:'#e8edf2',range:[-22,7]},
+      yaxis:{autorange:'reversed',tickfont:{size:11}},
+      shapes:[{type:'line',x0:0,x1:0,y0:0,y1:1,yref:'paper',line:{color:'#33465a',width:1.4,dash:'dash'}}],
+      font:{family:'Inter, Segoe UI, sans-serif',color:'#33465a',size:11},showlegend:false
+    },{responsive:true,displaylogo:false});
+  }
+  function createBestChart() {
+    const xSizes = SIZES.map(n => nf0.format(n));
+    const z = DISTRIBUTIONS.map(d => SIZES.map(n => {
+      const row = bestRows.find(r => r.dist === d.id && r.n === n);
+      return row ? row.cutoff : null;
+    }));
+    const custom = DISTRIBUTIONS.map(d => SIZES.map(n => {
+      const row = bestRows.find(r => r.dist === d.id && r.n === n);
+      return row ? [row.median_ms, row.dataset] : [null, ''];
+    }));
+    const heat = {
+      type:'heatmap', x:xSizes, y:DISTRIBUTIONS.map(d => d.label), z,
+      text:z.map(row => row.map(v => v == null ? '' : String(v))), texttemplate:'%{text}',
+      textfont:{size:16,color:'#ffffff'}, customdata:custom,
+      colorscale:[[0,'#dce8f2'],[.28,'#5f93bc'],[.58,'#2767a8'],[.82,'#315078'],[1,'#d97732']],
+      zmin:1,zmax:64, xgap:5, ygap:5,
+      colorbar:{title:'CUTOFF',tickvals:[1,7,10,16,24,32,40,48,64],thickness:14},
+      hovertemplate:'<b>%{y}</b><br>N = %{x}<br>CUTOFF tốt nhất đã thử: %{z}<br>Median: %{customdata[0]:.4f} ms<extra></extra>'
+    };
+    Plotly.newPlot('bestChart',[heat],{
+      paper_bgcolor:'#ffffff',plot_bgcolor:'#ffffff',margin:{l:130,r:75,t:20,b:65},
+      xaxis:{title:'Kích thước mảng N',side:'bottom'},yaxis:{autorange:'reversed'},
+      font:{family:'Inter, Segoe UI, sans-serif',color:'#33465a',size:12}
+    },{responsive:true,displaylogo:false});
+  }
+  function createTables() {
+    const bestBody = byId('bestTable').querySelector('tbody');
+    bestBody.innerHTML = sortedDatasets(bestRows).map(r => {
+      const boundary = r.cutoff === 64;
+      return `<tr data-search="${labelOf(r.dataset).toLowerCase()} ${r.dataset.toLowerCase()}"><td>${DISTRIBUTIONS.find(d=>d.id===r.dist).label}</td><td class="num">${nf0.format(r.n)}</td><td class="num"><strong>${r.cutoff}</strong></td><td class="num">${nf4.format(r.median_ms)}</td><td>${boundary ? '<span class="pill boundary">Chạm giới hạn trên 64</span>' : 'Thấp nhất trong các mức đã thử'}</td></tr>`;
+    }).join('');
+    const compareBody = byId('compareTable').querySelector('tbody');
+    compareBody.innerHTML = sortedDatasets(compareRows).map(r => {
+      const is10 = r.lower.includes('10');
+      return `<tr><td>${DISTRIBUTIONS.find(d=>d.id===r.dist).label}</td><td class="num">${nf0.format(r.n)}</td><td class="num">${nf4.format(r.m7)}</td><td class="num">${nf4.format(r.m10)}</td><td class="num">${r.diff > 0 ? '+' : ''}${r.diff.toFixed(2)}%</td><td><span class="pill ${is10?'ten':'seven'}">${r.lower}</span></td></tr>`;
+    }).join('');
+  }
+  function attachControls() {
+    byId('distributionSelect').addEventListener('change', applyDistributionVisibility);
+    byId('sizeSlider').addEventListener('input', e => { pauseAnimation(); updateSize(e.target.value, true); });
+    byId('playButton').addEventListener('click', startAnimation);
+    byId('pauseButton').addEventListener('click', pauseAnimation);
+    byId('errorToggle').addEventListener('change', e => {
+      if (plotReady) Plotly.restyle('runtimeChart', {'error_y.visible':e.target.checked}, [0,1,2,3]);
+    });
+    byId('bestSearch').addEventListener('input', e => {
+      const term = e.target.value.trim().toLowerCase();
+      for (const row of byId('bestTable').querySelectorAll('tbody tr'))
+        row.hidden = term && !row.dataset.search.includes(term);
+    });
+  }
+  async function init() {
+    try {
+      if (!window.Plotly) throw new Error('Không tải được thư viện Plotly. Kiểm tra kết nối Internet rồi tải lại trang.');
+      const [summary, compare, best] = await Promise.all([
+        loadCSV(FILES.summary), loadCSV(FILES.compare), loadCSV(FILES.best)
+      ]);
+      summaryRows = summary.map(r => {
+        const info = distributionOf(r.dataset);
+        return {...r, dist:info.type, n:Number(r.n), cutoff:Number(r.cutoff), runs:Number(r.runs),
+          median_ms:Number(r.median_ms), mean_ms:Number(r.mean_ms), stdev_ms:Number(r.stdev_ms),
+          min_ms:Number(r.min_ms), max_ms:Number(r.max_ms)};
+      });
+      compareRows = compare.map(r => {
+        const info = distributionOf(r.dataset);
+        return {...r, dist:info.type, n:Number(r.n), m7:Number(r.median_cutoff_7_ms), m10:Number(r.median_cutoff_10_ms),
+          diff:Number(r.difference_percent_T10_vs_T7), sd7:Number(r.stdev_cutoff_7_ms), sd10:Number(r.stdev_cutoff_10_ms), lower:r.lower_median};
+      });
+      bestRows = best.map(r => {
+        const info = distributionOf(r.dataset);
+        return {...r, dist:info.type, n:Number(r.n), cutoff:Number(r.best_cutoff_among_tested), median_ms:Number(r.median_ms)};
+      });
+      if (!summaryRows.length || !compareRows.length || !bestRows.length) throw new Error('Một hoặc nhiều tệp CSV không có dữ liệu.');
+
+      // Doi chieu cac bang tong hop voi summary.csv de phat hien CSV cu/khong dong bo.
+      const syncIssues = [];
+      const findSummary = (dataset, cutoff) => summaryRows.find(r => r.dataset === dataset && r.cutoff === cutoff);
+      for (const bestRow of bestRows) {
+        const group = summaryRows.filter(r => r.dataset === bestRow.dataset);
+        const measuredBest = group.reduce((acc, r) => !acc || r.median_ms < acc.median_ms ? r : acc, null);
+        if (!measuredBest || measuredBest.cutoff !== bestRow.cutoff || Math.abs(measuredBest.median_ms - bestRow.median_ms) > 0.000051) {
+          syncIssues.push(`Bảng CUTOFF tốt nhất không khớp summary.csv: ${bestRow.dataset}`);
+        }
+      }
+      for (const row of compareRows) {
+        const s7 = findSummary(row.dataset, 7), s10 = findSummary(row.dataset, 10);
+        if (!s7 || !s10 || Math.abs(s7.median_ms - row.m7) > 0.000051 || Math.abs(s10.median_ms - row.m10) > 0.000051) {
+          syncIssues.push(`Bảng so sánh 7/10 không khớp summary.csv: ${row.dataset}`);
+        }
+      }
+      if (syncIssues.length) {
+        byId('errorNotice').textContent = `Cảnh báo: phát hiện ${syncIssues.length} trường hợp giữa các CSV chưa khớp. Dashboard vẫn hiển thị dữ liệu từng tệp, nhưng cần kiểm tra lại các bảng tổng hợp trước khi sử dụng kết quả.`;
+        byId('errorNotice').classList.add('show');
+      }
+      if (summaryRows.length !== 288 || compareRows.length !== 16 || bestRows.length !== 16) {
+        byId('errorNotice').textContent = `Số dòng CSV hiện tại: summary ${summaryRows.length}, so sánh 7/10 ${compareRows.length}, CUTOFF tốt nhất ${bestRows.length}. Dashboard vẫn hiển thị đúng dữ liệu tìm thấy.`;
+        byId('errorNotice').classList.add('show');
+      }
+      updateKpis();
+      await createRuntimeChart();
+      createComparisonChart();
+      createBestChart();
+      createTables();
+      attachControls();
+      byId('loadStatus').classList.add('ready');
+      byId('statusText').textContent = `Đã tải ${summaryRows.length} dòng summary và ${compareRows.length + bestRows.length} dòng bảng tổng hợp từ GitHub.`;
+    } catch (err) {
+      console.error(err);
+      showError(`Không thể tải dữ liệu để vẽ dashboard. Chi tiết: ${err.message}. Hãy mở lại trang sau khi kiểm tra kết nối Internet và các tệp CSV trong repository.`);
+    }
+  }
+  init();
+})();
+</script>
+</body>
+</html>

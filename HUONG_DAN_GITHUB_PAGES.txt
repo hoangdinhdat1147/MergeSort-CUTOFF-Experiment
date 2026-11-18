@@ -1,0 +1,80 @@
+HUONG DAN THEM DASHBOARD TUONG TAC VAO DU AN
+============================================
+
+1. GIAI NEN
+-----------
+Giai nen goi nay vao THU MUC GOC cua du an:
+C:\Users\Admin\Downloads\MergeSort_CUTOFF_Project\MergeSort_CUTOFF_Project
+
+Sau khi giai nen, thu muc du an se co them:
+- docs\index.html
+- docs\.nojekyll
+- scripts\setup_dashboard.ps1
+
+Khong can xoa thu muc analysis\animated va khong can chay lai benchmark.
+
+2. CAP NHAT README.md
+---------------------
+Mo PowerShell tai thu muc goc du an va chay:
+
+powershell -ExecutionPolicy Bypass -File .\scripts\setup_dashboard.ps1
+
+Script se:
+- Thay phan bieu do cu trong README bang lien ket toi dashboard.
+- Cap nhat CPU, RAM va thong tin Windows da xac nhan.
+- Sao chep 3 CSV tu analysis\ sang docs\data\ de dashboard doc cung domain.
+- Luu mot ban sao README truoc khi sua trong thu muc %TEMP%.
+
+Kiem tra README.md bang Notepad hoac VS Code truoc khi commit.
+
+3. KIEM TRA CAC FILE
+--------------------
+Chay:
+
+Test-Path .\docs\index.html
+Test-Path .\analysis\summary.csv
+Test-Path .\analysis\cutoff_7_10_comparison.csv
+Test-Path .\analysis\best_cutoff_from_run.csv
+Test-Path .\docs\data\summary.csv
+Test-Path .\docs\data\cutoff_7_10_comparison.csv
+Test-Path .\docs\data\best_cutoff_from_run.csv
+
+Sau khi chay scripts\setup_dashboard.ps1, ca bay lenh phai tra ve True.
+
+4. THEM VA DAY LEN GITHUB
+-------------------------
+Chay:
+
+git status
+git add README.md docs/ scripts/setup_dashboard.ps1
+git commit -m "Add interactive CUTOFF dashboard"
+git push origin main
+
+Ba CSV trong docs\data\ se duoc them cung voi dashboard. Chung la ban sao cua cac tep trong analysis\ tai thoi diem chay script.
+
+5. BAT GITHUB PAGES (CAN THAO TAC TREN WEBSITE)
+-----------------------------------------------
+Sau khi push thanh cong:
+- Mo repository GitHub.
+- Chon Settings.
+- Chon Pages trong menu ben trai.
+- O Build and deployment, chon Deploy from a branch.
+- Branch: main.
+- Folder: /docs.
+- Nhan Save.
+
+GitHub Pages se xuat ban trang docs/index.html tai:
+https://hoangdinhdat1147.github.io/MergeSort-CUTOFF-Experiment/
+
+6. KIEM TRA
+-----------
+Mo dia chi dashboard sau khi GitHub Pages bao deploy thanh cong.
+Trang se doc ba bang CSV trong docs/data/ tren cung domain GitHub Pages va tai thu vien Plotly.js tu CDN. Trang can ket noi Internet de hien thi bieu do. Neu khong tai duoc du lieu, trang se hien thong bao loi thay vi tu tao so lieu.
+
+Neu sau nay chay lai benchmark va cap nhat cac CSV trong analysis\, chay lai scripts\setup_dashboard.ps1 de dong bo cac ban CSV trong docs\data\ truoc khi commit.
+
+Luu y:
+- Dashboard khong chay lai thuat toan va khong thay doi CSV.
+- Nut Phat chi chuyen qua cac kich thuoc mang da do: 10.000, 50.000, 100.000, 250.000.
+- Thanh sai so bieu thi ±1 SD, khong phai khoang tin cay 95%.
+- CUTOFF tot nhat chi la gia tri thap nhat trong 18 muc da thu.

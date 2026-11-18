@@ -26,7 +26,9 @@ MergeSort-CUTOFF-Experiment/
 │
 ├── scripts/                          # Công cụ sinh dữ liệu và phân tích
 │   ├── generate_data.py
-│   └── analyze_results.py
+│   ├── analyze_results.py
+│   ├── make_animated_charts.py
+│   └── setup_dashboard.ps1
 │
 ├── analysis/                         # Bảng thống kê và biểu đồ
 │   ├── summary.csv
@@ -37,6 +39,12 @@ MergeSort-CUTOFF-Experiment/
 │   ├── best_cutoff_by_dataset.png
 │   └── các biểu đồ riêng theo từng bộ dữ liệu
 │
+├── docs/                             # Trang dashboard GitHub Pages
+│   ├── index.html
+│   └── data/
+│       ├── summary.csv
+│       ├── cutoff_7_10_comparison.csv
+│       └── best_cutoff_from_run.csv
 ├── results.csv                       # Dữ liệu đo thô
 ├── run_experiment.bat                # Chạy toàn bộ quy trình trên Windows
 ├── Bao_cao_thi_nghiem_CUTOFF.docx    # Báo cáo thí nghiệm
@@ -218,36 +226,21 @@ Khi so sánh 18 giá trị đã thử, `CUTOFF = 64` có median thấp nhất tr
 Các kết quả tốt nhất của từng bộ dữ liệu được lưu trong `analysis/best_cutoff.csv` và `analysis/best_cutoff_from_run.csv`.
 
 
-### 6.3. So sánh CUTOFF 7 và CUTOFF 10
+### 6.3. Dashboard biểu đồ tương tác
 
-Biểu đồ thể hiện median thời gian chạy của hai giá trị CUTOFF trên 16 bộ dữ liệu.
+Các biểu đồ tương tác được đặt trong dashboard riêng để có thể chọn dạng dữ liệu, thay đổi kích thước mảng và phát lần lượt các trạng thái. Dashboard sử dụng các bảng CSV được sao chép từ `analysis/` sang `docs/data/`; không chạy lại thuật toán và không tạo thêm số đo.
 
-![So sánh CUTOFF 7 và 10](analysis/animated/comparison_cutoff_7_10.gif)
+**[MỞ DASHBOARD – XEM BIỂU ĐỒ TƯƠNG TÁC](https://hoangdinhdat1147.github.io/MergeSort-CUTOFF-Experiment/)**
 
-### 6.4. CUTOFF có median thấp nhất
+Dashboard gồm ba phần chính:
 
-Biểu đồ cho biết giá trị CUTOFF có median thấp nhất trong 18 giá trị được thử ở từng bộ dữ liệu.
+- Median thời gian chạy theo CUTOFF, có thể lọc theo dạng dữ liệu, chọn kích thước mảng và phát/tạm dừng chuyển động. Thanh sai số biểu thị ±1 độ lệch chuẩn.
+- So sánh median của CUTOFF 7 và CUTOFF 10 trên 16 bộ dữ liệu.
+- Bản đồ nhiệt thể hiện CUTOFF có median thấp nhất trong 18 giá trị đã thử.
 
-![CUTOFF tốt nhất theo từng bộ dữ liệu](analysis/animated/best_cutoff_by_dataset.gif)
+Chuyển động chỉ thay đổi tập dữ liệu đang hiển thị; các điểm trên biểu đồ đều lấy từ kết quả đo trong CSV. Giá trị CUTOFF = 64 là giới hạn trên của miền khảo sát, không đồng nghĩa với tối ưu toàn cục.
 
-### 6.5. Kết quả theo dạng dữ liệu
-
-**Dữ liệu ngẫu nhiên (Random)**
-
-![CUTOFF trên dữ liệu ngẫu nhiên](analysis/animated/cutoff_random_by_size.gif)
-
-**Dữ liệu tăng dần (Sorted)**
-
-![CUTOFF trên dữ liệu tăng dần](analysis/animated/cutoff_sorted_by_size.gif)
-
-**Dữ liệu giảm dần (Reverse)**
-
-![CUTOFF trên dữ liệu giảm dần](analysis/animated/cutoff_reverse_by_size.gif)
-
-**Dữ liệu gần tăng dần (Nearly sorted)**
-
-![CUTOFF trên dữ liệu gần tăng dần](analysis/animated/cutoff_nearly_sorted_by_size.gif)
-
+Dashboard sử dụng ba tệp CSV trong `docs/data/`. Các tệp này được sao chép từ `analysis/summary.csv`, `analysis/cutoff_7_10_comparison.csv` và `analysis/best_cutoff_from_run.csv` khi cài dashboard. Để mở trang, repository cần bật GitHub Pages với nguồn triển khai là nhánh `main`, thư mục `/docs`.
 ## 7. Các tệp kết quả
 
 | Tệp | Nội dung | Cách tạo |
@@ -260,6 +253,8 @@ Biểu đồ cho biết giá trị CUTOFF có median thấp nhất trong 18 giá
 | `analysis/best_cutoff_from_run.csv` | Bảng CUTOFF tốt nhất quan sát được trong lần chạy được báo cáo. | Tệp tổng hợp bổ sung cho báo cáo |
 | `analysis/comparison_cutoff_7_10.png` | Biểu đồ tổng hợp so sánh CUTOFF 7 và 10. | Tệp biểu đồ bổ sung cho báo cáo |
 | `analysis/best_cutoff_by_dataset.png` | Biểu đồ tổng hợp CUTOFF tốt nhất theo bộ dữ liệu. | Tệp biểu đồ bổ sung cho báo cáo |
+| `docs/index.html` | Dashboard biểu đồ tương tác. | GitHub Pages |
+| `docs/data/*.csv` | Bản sao các CSV dùng trong dashboard. | `scripts/setup_dashboard.ps1` |
 
 **Lưu ý:** `scripts/analyze_results.py` tự động tạo `summary.csv`, `best_cutoff.csv` và các biểu đồ riêng theo bộ dữ liệu. Các bảng và biểu đồ tổng hợp bổ sung nêu trên được lưu kèm repository; chúng không được script phân tích hiện tại tự động tạo lại. Nếu thay đổi dữ liệu hoặc chạy benchmark mới, cần cập nhật các tệp tổng hợp này trước khi dùng chúng để mô tả lần chạy mới.
 
