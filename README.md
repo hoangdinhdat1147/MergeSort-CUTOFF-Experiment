@@ -6,13 +6,33 @@ Dự án khảo sát ảnh hưởng của ngưỡng `CUTOFF` đến thời gian 
 
 Thí nghiệm tập trung so sánh hai giá trị thường được đề cập là `CUTOFF = 7` và `CUTOFF = 10`, đồng thời khảo sát thêm các giá trị khác để tìm vùng có hiệu năng tốt trên những bộ dữ liệu đã chọn.
 
-## 1. Mục tiêu
+## 1. Mục đích và mục tiêu nghiên cứu
 
-- Đo ảnh hưởng của `CUTOFF` đến thời gian chạy của cùng một cài đặt Top-down Mergesort.
-- So sánh riêng hiệu năng của `CUTOFF = 7` và `CUTOFF = 10`.
-- Khảo sát nhiều giá trị `CUTOFF` trên các kích thước và dạng dữ liệu khác nhau.
-- Dùng số liệu đo lặp, median và độ lệch chuẩn để đánh giá kết quả thay vì kết luận từ một lần chạy đơn lẻ.
+### 1.1. Mục đích nghiên cứu
 
+Nghiên cứu này nhằm đánh giá bằng thực nghiệm ảnh hưởng của ngưỡng CUTOFF đến hiệu năng của thuật toán Top-down Mergesort khi kết hợp với Insertion Sort để xử lý các đoạn mảng nhỏ.
+
+Việc lựa chọn CUTOFF tạo ra sự đánh đổi giữa chi phí chia đệ quy, trộn các đoạn mảng và chi phí sắp xếp trực tiếp bằng Insertion Sort. Khi thay đổi ngưỡng này, hiệu năng của thuật toán có thể thay đổi theo kích thước và đặc điểm dữ liệu đầu vào. Do đó, không thể chỉ dựa vào phân tích lý thuyết để xác định một giá trị phù hợp mà cần tiến hành đo đạc trên chương trình thực tế.
+
+Thông qua việc sử dụng cài đặt Mergesort tự xây dựng theo nội dung bài giảng, nghiên cứu hướng tới việc xác định giá trị hoặc vùng giá trị CUTOFF cho hiệu năng tốt trong phạm vi cấu hình phần cứng và các điều kiện thực nghiệm đã khảo sát.
+
+### 1.2. Mục tiêu cụ thể
+
+- Đánh giá ảnh hưởng của việc thay đổi CUTOFF đến thời gian thực thi của Top-down Mergesort kết hợp với Insertion Sort.
+- Kiểm chứng và so sánh hiệu năng của hai giá trị CUTOFF = 7 và CUTOFF = 10 được đề cập trong các phiên bản giáo trình.
+- Khảo sát 18 giá trị CUTOFF trên nhiều kích thước và dạng dữ liệu đầu vào nhằm tìm ra giá trị có hiệu năng tốt trong miền đã thử nghiệm.
+- Phân tích ảnh hưởng của kích thước và đặc điểm dữ liệu đầu vào đến hiệu quả của từng giá trị CUTOFF.
+- Tổng hợp và đánh giá kết quả dựa trên các lần đo lặp, sử dụng median và độ lệch chuẩn, kết hợp bảng thống kê và biểu đồ.
+
+### 1.3. Câu hỏi nghiên cứu
+
+Nghiên cứu tập trung trả lời ba câu hỏi:
+
+1. CUTOFF = 7 và CUTOFF = 10 có tạo ra sự khác biệt về thời gian thực thi hay không? Mức chênh lệch có giống nhau trên các bộ dữ liệu khác nhau không?
+2. Kích thước và đặc điểm dữ liệu đầu vào ảnh hưởng như thế nào đến hiệu năng khi thay đổi CUTOFF?
+3. Trong các giá trị đã khảo sát, giá trị nào cho thời gian thực thi tốt nhất đối với từng bộ dữ liệu? Có thể xác định một vùng CUTOFF phù hợp tương đối ổn định hay không?
+
+**Phạm vi kết luận:** Kết quả chỉ có giá trị đối với cài đặt Mergesort, cấu hình phần cứng và các điều kiện thực nghiệm cụ thể của nghiên cứu; không khẳng định tồn tại một giá trị CUTOFF tối ưu cho mọi hệ thống.
 ## 2. Cấu trúc dự án
 
 ```text
