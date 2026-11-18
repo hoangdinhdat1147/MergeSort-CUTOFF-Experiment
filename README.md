@@ -64,16 +64,16 @@ python -m pip install matplotlib
 
 | Thành phần | Phiên bản / thông tin |
 |---|---|
-| Hệ điều hành | Windows |
+| Hệ điều hành | Windows 11, Version 26H2 (OS Build 26300.9818) |
 | PowerShell | Windows PowerShell 5.1 |
 | Java | Java 25.0.2 LTS |
 | Trình biên dịch | `javac 25.0.2` |
 | Python | Python 3.14.7 |
 | Matplotlib | 3.11.2 |
-| CPU | Chưa được ghi nhận trong nhật ký chạy; cần bổ sung |
-| RAM | Chưa được ghi nhận trong nhật ký chạy; cần bổ sung |
+| CPU | 11th Gen Intel Core i7-1185G7 @ 3.00 GHz |
+| RAM | 32 GB (khả dụng 31,7 GB) |
 
-CPU và RAM cần được điền trước khi dùng báo cáo như một bản mô tả đầy đủ môi trường phần cứng.
+
 
 ## 4. Tải dự án và chạy thí nghiệm
 
@@ -218,73 +218,35 @@ Khi so sánh 18 giá trị đã thử, `CUTOFF = 64` có median thấp nhất tr
 Các kết quả tốt nhất của từng bộ dữ liệu được lưu trong `analysis/best_cutoff.csv` và `analysis/best_cutoff_from_run.csv`.
 
 
-### 6.3. Biểu đồ tổng hợp
+### 6.3. So sánh CUTOFF 7 và CUTOFF 10
 
-Hai biểu đồ dưới đây thể hiện kết quả nổi bật của thí nghiệm.
+Biểu đồ thể hiện median thời gian chạy của hai giá trị CUTOFF trên 16 bộ dữ liệu.
 
-**So sánh hiệu năng giữa CUTOFF = 7 và CUTOFF = 10**
+![So sánh CUTOFF 7 và 10](analysis/animated/comparison_cutoff_7_10.gif)
 
-![So sánh CUTOFF 7 và CUTOFF 10](analysis/comparison_cutoff_7_10.png)
+### 6.4. CUTOFF có median thấp nhất
 
-**CUTOFF có median thấp nhất theo từng bộ dữ liệu**
+Biểu đồ cho biết giá trị CUTOFF có median thấp nhất trong 18 giá trị được thử ở từng bộ dữ liệu.
 
-![CUTOFF tốt nhất theo từng bộ dữ liệu](analysis/best_cutoff_by_dataset.png)
+![CUTOFF tốt nhất theo từng bộ dữ liệu](analysis/animated/best_cutoff_by_dataset.gif)
 
-### 6.4. Biểu đồ chi tiết theo từng bộ dữ liệu
+### 6.5. Kết quả theo dạng dữ liệu
 
-Các biểu đồ dưới đây thể hiện median thời gian chạy theo từng giá trị CUTOFF, tương ứng với 4 dạng dữ liệu và 4 kích thước mảng.
+**Dữ liệu ngẫu nhiên (Random)**
 
-<details>
-<summary><strong>Dữ liệu ngẫu nhiên (Random)</strong></summary>
+![CUTOFF trên dữ liệu ngẫu nhiên](analysis/animated/cutoff_random_by_size.gif)
 
-| 10.000 phần tử | 50.000 phần tử |
-|---|---|
-| ![Random 10000](analysis/random_10000.txt.png) | ![Random 50000](analysis/random_50000.txt.png) |
+**Dữ liệu tăng dần (Sorted)**
 
-| 100.000 phần tử | 250.000 phần tử |
-|---|---|
-| ![Random 100000](analysis/random_100000.txt.png) | ![Random 250000](analysis/random_250000.txt.png) |
+![CUTOFF trên dữ liệu tăng dần](analysis/animated/cutoff_sorted_by_size.gif)
 
-</details>
+**Dữ liệu giảm dần (Reverse)**
 
-<details>
-<summary><strong>Dữ liệu tăng dần (Sorted)</strong></summary>
+![CUTOFF trên dữ liệu giảm dần](analysis/animated/cutoff_reverse_by_size.gif)
 
-| 10.000 phần tử | 50.000 phần tử |
-|---|---|
-| ![Sorted 10000](analysis/sorted_10000.txt.png) | ![Sorted 50000](analysis/sorted_50000.txt.png) |
+**Dữ liệu gần tăng dần (Nearly sorted)**
 
-| 100.000 phần tử | 250.000 phần tử |
-|---|---|
-| ![Sorted 100000](analysis/sorted_100000.txt.png) | ![Sorted 250000](analysis/sorted_250000.txt.png) |
-
-</details>
-
-<details>
-<summary><strong>Dữ liệu giảm dần (Reverse)</strong></summary>
-
-| 10.000 phần tử | 50.000 phần tử |
-|---|---|
-| ![Reverse 10000](analysis/reverse_10000.txt.png) | ![Reverse 50000](analysis/reverse_50000.txt.png) |
-
-| 100.000 phần tử | 250.000 phần tử |
-|---|---|
-| ![Reverse 100000](analysis/reverse_100000.txt.png) | ![Reverse 250000](analysis/reverse_250000.txt.png) |
-
-</details>
-
-<details>
-<summary><strong>Dữ liệu gần tăng dần (Nearly sorted)</summary>
-
-| 10.000 phần tử | 50.000 phần tử |
-|---|---|
-| ![Nearly sorted 10000](analysis/nearly_sorted_10000.txt.png) | ![Nearly sorted 50000](analysis/nearly_sorted_50000.txt.png) |
-
-| 100.000 phần tử | 250.000 phần tử |
-|---|---|
-| ![Nearly sorted 100000](analysis/nearly_sorted_100000.txt.png) | ![Nearly sorted 250000](analysis/nearly_sorted_250000.txt.png) |
-
-</details>
+![CUTOFF trên dữ liệu gần tăng dần](analysis/animated/cutoff_nearly_sorted_by_size.gif)
 
 ## 7. Các tệp kết quả
 
@@ -328,4 +290,4 @@ Dữ liệu sinh bằng seed cố định giúp tái tạo đầu vào, nhưng k
 
 ---
 
-**Trạng thái báo cáo:** kết quả lần chạy ngày 17/11/2026. Thông tin CPU và RAM của máy thực nghiệm chưa được ghi nhận và cần được bổ sung trước khi nộp báo cáo chính thức.
+**Trạng thái báo cáo:** kết quả lần chạy ngày 17/11/2026. Máy thực nghiệm sử dụng Intel Core i7-1185G7, RAM 32 GB, Windows 11 và Java 25.0.2 LTS.
