@@ -1,35 +1,35 @@
-HUONG DAN THEM DASHBOARD TUONG TAC VAO DU AN
+HƯỚNG DẪN THÊM DASHBOARD TƯƠNG TÁC VÀO DỰ ÁN
 ============================================
 
-1. GIAI NEN
+1. GIẢI NÉN
 -----------
-Giai nen goi nay vao THU MUC GOC cua du an:
+Giải nén gói này vào THƯ MỤC GỐC của dự án:
 C:\Users\Admin\Downloads\MergeSort_CUTOFF_Project\MergeSort_CUTOFF_Project
 
-Sau khi giai nen, thu muc du an se co them:
+Sau khi giải nén, thư mục dự án sẽ có thêm:
 - docs\index.html
 - docs\.nojekyll
 - scripts\setup_dashboard.ps1
 
-Khong can xoa thu muc analysis\animated va khong can chay lai benchmark.
+Không cần xóa thư mục analysis\animated và không cần chạy lại benchmark.
 
-2. CAP NHAT README.md
+2. CẬP NHẬT README.md
 ---------------------
-Mo PowerShell tai thu muc goc du an va chay:
+Mở PowerShell tại thư mục gốc dự án và chạy:
 
 powershell -ExecutionPolicy Bypass -File .\scripts\setup_dashboard.ps1
 
-Script se:
-- Thay phan bieu do cu trong README bang lien ket toi dashboard.
-- Cap nhat CPU, RAM va thong tin Windows da xac nhan.
-- Sao chep 3 CSV tu analysis\ sang docs\data\ de dashboard doc cung domain.
-- Luu mot ban sao README truoc khi sua trong thu muc %TEMP%.
+Script sẽ:
+- Thay phần biểu đồ cũ trong README bằng liên kết tới dashboard.
+- Cập nhật CPU, RAM và thông tin Windows đã xác nhận.
+- Sao chép 3 CSV từ analysis\ sang docs\data\ để dashboard đọc cùng domain.
+- Lưu một bản sao README trước khi sửa trong thư mục %TEMP%.
 
-Kiem tra README.md bang Notepad hoac VS Code truoc khi commit.
+Kiểm tra README.md bằng Notepad hoặc VS Code trước khi commit.
 
-3. KIEM TRA CAC FILE
+3. KIỂM TRA CÁC FILE
 --------------------
-Chay:
+Chạy:
 
 Test-Path .\docs\index.html
 Test-Path .\analysis\summary.csv
@@ -39,42 +39,42 @@ Test-Path .\docs\data\summary.csv
 Test-Path .\docs\data\cutoff_7_10_comparison.csv
 Test-Path .\docs\data\best_cutoff_from_run.csv
 
-Sau khi chay scripts\setup_dashboard.ps1, ca bay lenh phai tra ve True.
+Sau khi chạy scripts\setup_dashboard.ps1, cả bảy lệnh phải trả về True.
 
-4. THEM VA DAY LEN GITHUB
+4. THÊM VÀ ĐẨY LÊN GITHUB
 -------------------------
-Chay:
+Chạy:
 
 git status
 git add README.md docs/ scripts/setup_dashboard.ps1
 git commit -m "Add interactive CUTOFF dashboard"
 git push origin main
 
-Ba CSV trong docs\data\ se duoc them cung voi dashboard. Chung la ban sao cua cac tep trong analysis\ tai thoi diem chay script.
+Ba CSV trong docs\data\ sẽ được thêm cùng với dashboard. Chúng là bản sao của các tệp trong analysis\ tại thời điểm chạy script.
 
-5. BAT GITHUB PAGES (CAN THAO TAC TREN WEBSITE)
+5. BẬT GITHUB PAGES (CẦN THAO TÁC TRÊN WEBSITE)
 -----------------------------------------------
-Sau khi push thanh cong:
-- Mo repository GitHub.
-- Chon Settings.
-- Chon Pages trong menu ben trai.
-- O Build and deployment, chon Deploy from a branch.
+Sau khi push thành công:
+- Mở repository GitHub.
+- Chọn Settings.
+- Chọn Pages trong menu bên trái.
+- Ở Build and deployment, chọn Deploy from a branch.
 - Branch: main.
 - Folder: /docs.
-- Nhan Save.
+- Nhấn Save.
 
-GitHub Pages se xuat ban trang docs/index.html tai:
+GitHub Pages sẽ xuất bản trang docs/index.html tại:
 https://hoangdinhdat1147.github.io/MergeSort-CUTOFF-Experiment/
 
-6. KIEM TRA
+6. KIỂM TRA
 -----------
-Mo dia chi dashboard sau khi GitHub Pages bao deploy thanh cong.
-Trang se doc ba bang CSV trong docs/data/ tren cung domain GitHub Pages va tai thu vien Plotly.js tu CDN. Trang can ket noi Internet de hien thi bieu do. Neu khong tai duoc du lieu, trang se hien thong bao loi thay vi tu tao so lieu.
+Mở địa chỉ dashboard sau khi GitHub Pages báo deploy thành công.
+Trang sẽ đọc ba bảng CSV trong docs/data/ trên cùng domain GitHub Pages và tải thư viện Plotly.js từ CDN. Trang cần kết nối Internet để hiển thị biểu đồ. Nếu không tải được dữ liệu, trang sẽ hiển thị thông báo lỗi thay vì tự tạo số liệu.
 
-Neu sau nay chay lai benchmark va cap nhat cac CSV trong analysis\, chay lai scripts\setup_dashboard.ps1 de dong bo cac ban CSV trong docs\data\ truoc khi commit.
+Nếu sau này chạy lại benchmark và cập nhật các CSV trong analysis\, chạy lại scripts\setup_dashboard.ps1 để đồng bộ các bản CSV trong docs\data\ trước khi commit.
 
-Luu y:
-- Dashboard khong chay lai thuat toan va khong thay doi CSV.
-- Nut Phat chi chuyen qua cac kich thuoc mang da do: 10.000, 50.000, 100.000, 250.000.
-- Thanh sai so bieu thi ±1 SD, khong phai khoang tin cay 95%.
-- CUTOFF tot nhat chi la gia tri thap nhat trong 18 muc da thu.
+Lưu ý:
+- Dashboard không chạy lại thuật toán và không thay đổi CSV.
+- Nút Phát chỉ chuyển qua các kích thước mảng đã đo: 10.000, 50.000, 100.000, 250.000.
+- Thanh sai số biểu thị ±1 SD, không phải khoảng tin cậy 95%.
+- CUTOFF tốt nhất chỉ là giá trị thấp nhất trong 18 mức đã thử.
