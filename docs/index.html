@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="vi">
 <head>
   <meta charset="utf-8">
@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#10243a">
   <title>MergeSort CUTOFF — Dashboard kết quả</title>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
       --ink: #17283c;
@@ -283,6 +284,8 @@
   const byId = id => document.getElementById(id);
   let summaryRows = [], compareRows = [], bestRows = [];
   let plotReady = false, animationTimer = null, animationIndex = 0;
+  let runtimeChartJS = null;
+  let runtimeErrorVisible = true;
 
   function parseCSV(text) {
     const rows = [];
@@ -378,61 +381,414 @@
       annotations:[{text:'Ngôi sao: median thấp nhất trong 18 CUTOFF đã thử',xref:'paper',yref:'paper',x:1,y:1.12,xanchor:'right',showarrow:false,font:{size:10,color:'#68798c'}}]
     };
   }
-  async function createRuntimeChart() {
-    const initial = tracesForSize(SIZES[0]);
-    await Plotly.newPlot('runtimeChart', initial, runtimeLayout(SIZES[0]), {
-      responsive:true, displaylogo:false, modeBarButtonsToRemove:['lasso2d','select2d','autoScale2d']
+  const runtimeErrorBarPlugin = {
+    id: 'runtimeErrorBars',
+
+    afterDatasetsDraw(chart) {
+      if (!runtimeErrorVisible) return;
+
+      const yScale = chart.scales.y;
+      if (!yScale) return;
+
+      const ctx = chart.ctx;
+
+      chart.data.datasets.forEach((dataset, datasetIndex) => {
+        if (!Array.isArray(dataset.errorValues)) return;
+
+        const meta = chart.getDatasetMeta(datasetIndex);
+        if (!meta || !meta.data) return;
+
+        ctx.save();
+        ctx.strokeStyle = dataset.borderColor || '#64748b';
+        ctx.lineWidth = 1.15;
+
+        meta.data.forEach((point, index) => {
+          const value = Number(dataset.data[index]);
+          const sd = Number(dataset.errorValues[index]);
+
+          if (!Number.isFinite(value) || !Number.isFinite(sd)) return;
+
+          const top = yScale.getPixelForValue(value + sd);
+          const bottom = yScale.getPixelForValue(value - sd);
+          const x = point.x;
+          const cap = 3.5;
+
+          ctx.beginPath();
+
+          ctx.moveTo(x, top);
+          ctx.lineTo(x, bottom);
+
+          ctx.moveTo(x - cap, top);
+          ctx.lineTo(x + cap, top);
+
+          ctx.moveTo(x - cap, bottom);
+          ctx.lineTo(x + cap, bottom);
+
+          ctx.stroke();
+        });
+
+        ctx.restore();
+      });
+    }
+  };
+
+  function runtimeRowsFor(n, distId) {
+    return summaryRows
+      .filter(r => r.dist === distId && r.n === n)
+      .sort((a,b) => a.cutoff - b.cutoff);
+  }
+
+  function runtimeSelectedDistributions() {
+    const selected = byId('distributionSelect').value;
+
+    if (selected === 'all') {
+      return DISTRIBUTIONS;
+    }
+
+    const dist = DISTRIBUTIONS.find(d => d.id === selected);
+    return dist ? [dist] : [];
+  }
+
+  function runtimeBuildDatasets(n) {
+    return runtimeSelectedDistributions().map(dist => {
+      const rows = runtimeRowsFor(n, dist.id);
+
+      const best = rows.reduce(
+        (acc, r) => !acc || r.median_ms < acc.median_ms ? r : acc,
+        null
+      );
+
+      return {
+        label: dist.label,
+
+        data: rows.map(r => r.median_ms),
+
+        errorValues: rows.map(r => r.stdev_ms),
+
+        meanValues: rows.map(r => r.mean_ms),
+
+        minValues: rows.map(r => r.min_ms),
+
+        maxValues: rows.map(r => r.max_ms),
+
+        runValues: rows.map(r => r.runs),
+
+        bestCutoff: best ? best.cutoff : null,
+
+        borderColor: dist.color,
+        backgroundColor: dist.color,
+
+        borderWidth: 2.5,
+
+        tension: 0.20,
+
+        fill: false,
+
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 1.2,
+
+        pointRadius(context) {
+          const cutoff = CUTOFFS[context.dataIndex];
+          return cutoff === best?.cutoff ? 8 : 5;
+        },
+
+        pointHoverRadius(context) {
+          const cutoff = CUTOFFS[context.dataIndex];
+          return cutoff === best?.cutoff ? 10 : 7;
+        },
+
+        pointStyle(context) {
+          const cutoff = CUTOFFS[context.dataIndex];
+          return cutoff === best?.cutoff ? 'star' : 'circle';
+        },
+
+        pointBackgroundColor(context) {
+          const cutoff = CUTOFFS[context.dataIndex];
+          return cutoff === best?.cutoff ? '#d97732' : dist.color;
+        }
+      };
     });
-    const frames = SIZES.map(n => ({name:String(n), data:tracesForSize(n), traces:[0,1,2,3], layout:{title:{text:`Median thời gian chạy · N = ${nf0.format(n)}`}}}));
-    await Plotly.addFrames('runtimeChart', frames);
-    applyDistributionVisibility();
+  }
+
+  function runtimeYMax(datasets) {
+    let maxUpper = 0;
+
+    datasets.forEach(dataset => {
+      dataset.data.forEach((value, index) => {
+        const median = Number(value);
+        const sd = Number(dataset.errorValues[index] || 0);
+
+        if (Number.isFinite(median)) {
+          maxUpper = Math.max(
+            maxUpper,
+            median + (Number.isFinite(sd) ? sd : 0)
+          );
+        }
+      });
+    });
+
+    return maxUpper > 0 ? maxUpper * 1.12 : 1;
+  }
+
+  function runtimeTooltipConfig() {
+    return {
+      callbacks: {
+        title(items) {
+          return `CUTOFF = ${items[0].label}`;
+        },
+
+        label(context) {
+          const dataset = context.dataset;
+          const index = context.dataIndex;
+
+          const median = Number(dataset.data[index]);
+          const mean = Number(dataset.meanValues[index]);
+          const sd = Number(dataset.errorValues[index]);
+          const min = Number(dataset.minValues[index]);
+          const max = Number(dataset.maxValues[index]);
+          const runs = Number(dataset.runValues[index]);
+
+          return [
+            `${dataset.label}: ${median.toFixed(4)} ms`,
+            `Mean: ${mean.toFixed(4)} ms`,
+            `SD: ±${sd.toFixed(4)} ms`,
+            `Min: ${min.toFixed(4)} ms`,
+            `Max: ${max.toFixed(4)} ms`,
+            `Số lần đo: ${runs}`
+          ];
+        }
+      }
+    };
+  }
+
+  async function createRuntimeChart() {
+    const host = byId('runtimeChart');
+
+    if (runtimeChartJS) {
+      runtimeChartJS.destroy();
+      runtimeChartJS = null;
+    }
+
+    host.innerHTML = '<canvas id="runtimeChartCanvas"></canvas>';
+
+    host.style.height =
+      window.innerWidth <= 560 ? '430px' : '470px';
+
+    const canvas = byId('runtimeChartCanvas');
+
+    const n = SIZES[animationIndex];
+    const datasets = runtimeBuildDatasets(n);
+
+    runtimeChartJS = new Chart(canvas, {
+      type: 'line',
+
+      data: {
+        labels: CUTOFFS.map(String),
+        datasets
+      },
+
+      plugins: [runtimeErrorBarPlugin],
+
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        animation: {
+          duration: 750,
+          easing: 'easeInOutCubic'
+        },
+
+        transitions: {
+          active: {
+            animation: {
+              duration: 350
+            }
+          }
+        },
+
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+
+        plugins: {
+          legend: {
+            display: true,
+
+            labels: {
+              color: '#33465a',
+              usePointStyle: true,
+              padding: 18
+            }
+          },
+
+          title: {
+            display: true,
+
+            text:
+              `Median thời gian chạy · N = ${nf0.format(n)}`,
+
+            color: '#17283c',
+
+            font: {
+              size: 17,
+              weight: '700'
+            },
+
+            align: 'start',
+
+            padding: {
+              bottom: 12
+            }
+          },
+
+          tooltip: runtimeTooltipConfig()
+        },
+
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Giá trị CUTOFF',
+              color: '#33465a'
+            },
+
+            ticks: {
+              color: '#63758a'
+            },
+
+            grid: {
+              color: '#e8edf2'
+            }
+          },
+
+          y: {
+            beginAtZero: true,
+
+            suggestedMax: runtimeYMax(datasets),
+
+            title: {
+              display: true,
+              text: 'Median thời gian chạy (ms)',
+              color: '#33465a'
+            },
+
+            ticks: {
+              color: '#63758a'
+            },
+
+            grid: {
+              color: '#e8edf2'
+            }
+          }
+        }
+      }
+    });
+
     plotReady = true;
+
     byId('playButton').disabled = false;
     byId('pauseButton').disabled = false;
     byId('sizeSlider').disabled = false;
   }
-  function applyDistributionVisibility() {
-    if (!plotReady) return;
-    const selected = byId('distributionSelect').value;
-    const visible = DISTRIBUTIONS.map(d => selected === 'all' || selected === d.id);
-    Plotly.restyle('runtimeChart', {visible}, [0,1,2,3]);
-  }
-  function updateSize(index, animated=true) {
-    animationIndex = Math.max(0, Math.min(SIZES.length - 1, Number(index)));
+
+  function updateRuntimeChart(animated = true) {
+    if (!runtimeChartJS) return;
+
     const n = SIZES[animationIndex];
+    const datasets = runtimeBuildDatasets(n);
+
+    runtimeChartJS.data.labels = CUTOFFS.map(String);
+    runtimeChartJS.data.datasets = datasets;
+
+    runtimeChartJS.options.animation = animated
+      ? {
+          duration: 750,
+          easing: 'easeInOutCubic'
+        }
+      : false;
+
+    runtimeChartJS.options.scales.y.suggestedMax =
+      runtimeYMax(datasets);
+
+    runtimeChartJS.options.plugins.title.text =
+      `Median thời gian chạy · N = ${nf0.format(n)}`;
+
+    runtimeChartJS.update();
+  }
+
+  function applyDistributionVisibility() {
+    if (!plotReady || !runtimeChartJS) return;
+
+    updateRuntimeChart(true);
+  }
+
+  function updateSize(index, animated = true) {
+    animationIndex = Math.max(
+      0,
+      Math.min(SIZES.length - 1, Number(index))
+    );
+
+    const n = SIZES[animationIndex];
+
     byId('sizeSlider').value = animationIndex;
     byId('sizeValue').textContent = nf0.format(n);
+
     if (plotReady) {
-      const opts = animated
-        ? {mode:'immediate', transition:{duration:420,easing:'cubic-in-out'}, frame:{duration:0,redraw:true}}
-        : {mode:'immediate', transition:{duration:0}, frame:{duration:0,redraw:true}};
-      const animation = Plotly.animate('runtimeChart', [String(n)], opts);
-      Promise.resolve(animation).then(() => {
-        applyDistributionVisibility();
-        Plotly.restyle('runtimeChart', {'error_y.visible':byId('errorToggle').checked}, [0,1,2,3]);
-      });
+      updateRuntimeChart(animated);
     }
   }
+
   function stopAnimation() {
-    if (animationTimer) window.clearTimeout(animationTimer);
+    if (animationTimer) {
+      window.clearTimeout(animationTimer);
+    }
+
     animationTimer = null;
+
+    byId('playButton').dataset.playing = 'false';
     byId('playButton').textContent = '▶ Phát';
   }
+
   function playNext() {
-    if (!animationTimer && byId('playButton').dataset.playing !== 'true') return;
-    const next = (animationIndex + 1) % SIZES.length;
+    if (
+      !animationTimer &&
+      byId('playButton').dataset.playing !== 'true'
+    ) {
+      return;
+    }
+
+    const next =
+      (animationIndex + 1) % SIZES.length;
+
     updateSize(next, true);
-    const delay = Number(byId('speedSelect').value);
-    animationTimer = window.setTimeout(() => { animationTimer = null; playNext(); }, delay);
+
+    const delay =
+      Number(byId('speedSelect').value);
+
+    animationTimer = window.setTimeout(() => {
+      animationTimer = null;
+      playNext();
+    }, delay);
   }
+
   function startAnimation() {
-    if (byId('playButton').dataset.playing === 'true') return;
+    if (
+      byId('playButton').dataset.playing === 'true'
+    ) {
+      return;
+    }
+
     byId('playButton').dataset.playing = 'true';
     byId('playButton').textContent = '▶ Đang phát';
-    animationTimer = window.setTimeout(() => { animationTimer = null; playNext(); }, 250);
+
+    animationTimer = window.setTimeout(() => {
+      animationTimer = null;
+      playNext();
+    }, 250);
   }
+
   function pauseAnimation() {
-    byId('playButton').dataset.playing = 'false';
     stopAnimation();
   }
   function createComparisonChart() {
@@ -494,22 +850,64 @@
     }).join('');
   }
   function attachControls() {
-    byId('distributionSelect').addEventListener('change', applyDistributionVisibility);
-    byId('sizeSlider').addEventListener('input', e => { pauseAnimation(); updateSize(e.target.value, true); });
-    byId('playButton').addEventListener('click', startAnimation);
-    byId('pauseButton').addEventListener('click', pauseAnimation);
-    byId('errorToggle').addEventListener('change', e => {
-      if (plotReady) Plotly.restyle('runtimeChart', {'error_y.visible':e.target.checked}, [0,1,2,3]);
-    });
-    byId('bestSearch').addEventListener('input', e => {
-      const term = e.target.value.trim().toLowerCase();
-      for (const row of byId('bestTable').querySelectorAll('tbody tr'))
-        row.hidden = term && !row.dataset.search.includes(term);
-    });
+    byId('distributionSelect').addEventListener(
+      'change',
+      () => {
+        if (plotReady) {
+          updateRuntimeChart(true);
+        }
+      }
+    );
+
+    byId('sizeSlider').addEventListener(
+      'input',
+      e => {
+        pauseAnimation();
+        updateSize(e.target.value, true);
+      }
+    );
+
+    byId('playButton').addEventListener(
+      'click',
+      startAnimation
+    );
+
+    byId('pauseButton').addEventListener(
+      'click',
+      pauseAnimation
+    );
+
+    byId('errorToggle').addEventListener(
+      'change',
+      e => {
+        runtimeErrorVisible = e.target.checked;
+
+        if (runtimeChartJS) {
+          runtimeChartJS.update('none');
+        }
+      }
+    );
+
+    byId('bestSearch').addEventListener(
+      'input',
+      e => {
+        const term =
+          e.target.value.trim().toLowerCase();
+
+        for (
+          const row of
+          byId('bestTable').querySelectorAll('tbody tr')
+        ) {
+          row.hidden =
+            term &&
+            !row.dataset.search.includes(term);
+        }
+      }
+    );
   }
   async function init() {
     try {
-      if (!window.Plotly) throw new Error('Không tải được thư viện Plotly. Kiểm tra kết nối Internet rồi tải lại trang.');
+      if (!window.Plotly || !window.Chart) throw new Error('Không tải được thư viện biểu đồ. Kiểm tra kết nối Internet rồi tải lại trang.');
       const [summary, compare, best] = await Promise.all([
         loadCSV(FILES.summary), loadCSV(FILES.compare), loadCSV(FILES.best)
       ]);
