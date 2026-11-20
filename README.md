@@ -273,6 +273,8 @@ Dashboard sử dụng ba tệp CSV trong `docs/data/`. Các tệp này được 
 | `analysis/best_cutoff_from_run.csv` | Bảng CUTOFF tốt nhất quan sát được trong lần chạy được báo cáo. | Tệp tổng hợp bổ sung cho báo cáo |
 | `analysis/comparison_cutoff_7_10.png` | Biểu đồ tổng hợp so sánh CUTOFF 7 và 10. | Tệp biểu đồ bổ sung cho báo cáo |
 | `analysis/best_cutoff_by_dataset.png` | Biểu đồ tổng hợp CUTOFF tốt nhất theo bộ dữ liệu. | Tệp biểu đồ bổ sung cho báo cáo |
+| `docs/index.html` | Dashboard biểu đồ tương tác. | GitHub Pages |
+| `docs/data/*.csv` | Bản sao các CSV dùng trong dashboard. | `scripts/setup_dashboard.ps1` |
 | `analysis/animated/comparison_cutoff_7_10.gif` | Biểu đồ động so sánh median của CUTOFF 7 và CUTOFF 10 trên 16 bộ dữ liệu. | `scripts/make_animated_charts.py` |
 | `analysis/animated/best_cutoff_by_dataset.gif` | Biểu đồ động thể hiện CUTOFF có median thấp nhất theo từng bộ dữ liệu. | `scripts/make_animated_charts.py` |
 | `analysis/animated/cutoff_random_by_size.gif` | Biểu đồ động khảo sát CUTOFF trên dữ liệu ngẫu nhiên theo bốn kích thước mảng. | `scripts/make_animated_charts.py` |
