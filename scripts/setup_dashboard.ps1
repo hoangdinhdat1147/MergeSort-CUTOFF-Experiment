@@ -67,7 +67,7 @@ if ($updated -match '(?m)^│   └── analyze_results\.py\s*$') {
 if ($updated -notmatch '(?m)^├── docs/') {
     $updated = $updated.Replace('├── results.csv', "├── docs/                             # Trang dashboard GitHub Pages`r`n│   ├── index.html`r`n│   └── data/`r`n│       ├── summary.csv`r`n│       ├── cutoff_7_10_comparison.csv`r`n│       └── best_cutoff_from_run.csv`r`n├── results.csv")
 }
-$updated = $updated.Replace('**Trạng thái báo cáo:** kết quả lần chạy ngày 17/11/2026. Thông tin CPU và RAM của máy thực nghiệm chưa được ghi nhận và cần được bổ sung trước khi nộp báo cáo chính thức.', '**Trạng thái báo cáo:** kết quả lần chạy ngày 17/11/2026. Máy thực nghiệm sử dụng Intel Core i7-1185G7, RAM 32 GB, Windows 11 và Java 25.0.2 LTS.')
+$updated = $updated.Replace('**Trạng thái báo cáo:** kết quả lần chạy ngày 26/11/2026. Thông tin CPU và RAM của máy thực nghiệm chưa được ghi nhận và cần được bổ sung trước khi nộp báo cáo chính thức.', '**Trạng thái báo cáo:** kết quả lần chạy ngày 26/11/2026. Máy thực nghiệm sử dụng Intel Core i7-1185G7, RAM 32 GB, Windows 11 và Java 25.0.2 LTS.')
 
 # Dong bo ba bang CSV vao docs/data de dashboard doc duoc tren cung domain GitHub Pages.
 New-Item -ItemType Directory -Force -Path $dataTarget | Out-Null

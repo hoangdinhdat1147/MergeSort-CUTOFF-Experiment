@@ -1,0 +1,17 @@
+dataset,cv_cutoff_7_percent,cv_cutoff_10_percent,formula
+random_10000.txt,8.16,4.15,SD/Mean*100
+random_50000.txt,28.14,39.51,SD/Mean*100
+random_100000.txt,6.65,40.29,SD/Mean*100
+random_250000.txt,12.34,19.37,SD/Mean*100
+sorted_10000.txt,12.58,10.33,SD/Mean*100
+sorted_50000.txt,14.56,12.46,SD/Mean*100
+sorted_100000.txt,5.64,15.50,SD/Mean*100
+sorted_250000.txt,9.66,77.48,SD/Mean*100
+reverse_10000.txt,18.21,12.74,SD/Mean*100
+reverse_50000.txt,12.63,17.12,SD/Mean*100
+reverse_100000.txt,7.66,59.66,SD/Mean*100
+reverse_250000.txt,14.17,5.63,SD/Mean*100
+nearly_sorted_10000.txt,21.66,29.98,SD/Mean*100
+nearly_sorted_50000.txt,53.57,47.53,SD/Mean*100
+nearly_sorted_100000.txt,20.57,12.20,SD/Mean*100
+nearly_sorted_250000.txt,20.43,14.13,SD/Mean*100

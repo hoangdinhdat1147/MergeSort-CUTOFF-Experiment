@@ -141,39 +141,53 @@ public class MergeSortTest {
         check(!MergeSort.isSorted(new int[] {2, 1}), "isSorted: hai phan tu nguoc");
     }
 
-    /** Kiểm tra toàn bộ 16 bộ dữ liệu thật của dự án (bỏ qua nếu chạy ngoài thư mục gốc). */
+    /** Kiem tra day du 16 bo du lieu that va tat ca CUTOFF cua thi nghiem. */
     private static void testRepositoryDatasets() throws Exception {
         Path dir = Paths.get("datasets");
         if (!Files.isDirectory(dir)) {
-            System.out.println("Bo qua kiem thu datasets/ (khong tim thay thu muc, hay chay tu thu muc goc).");
+            check(false, "khong tim thay thu muc datasets/");
             return;
         }
 
         int[] sizes = {10_000, 50_000, 100_000, 250_000};
         String[] kinds = {"random", "sorted", "reverse", "nearly_sorted"};
-        // Bao phủ toàn bộ 16 bộ dữ liệu, nhưng chỉ dùng các CUTOFF đại diện
-        // để giữ thời gian CI hợp lý. Các CUTOFF còn lại đã được kiểm thử
-        // rộng trên dữ liệu tổng hợp ở các test phía trên.
-        int[] datasetCutoffs = {1, 7, 10, 64};
+        int expectedDatasetCount = sizes.length * kinds.length;
+        int actualDatasetCount;
+        try (java.util.stream.Stream<Path> files = Files.list(dir)) {
+            actualDatasetCount = (int) files
+                .filter(Files::isRegularFile)
+                .filter(p -> p.getFileName().toString().endsWith(".txt"))
+                .count();
+        }
+        check(actualDatasetCount == expectedDatasetCount,
+            "datasets/ phai co " + expectedDatasetCount + " file .txt, thuc te " + actualDatasetCount);
 
         for (String kind : kinds) {
-            for (int n : sizes) {
-                String name = kind + "_" + n + ".txt";
+            for (int size : sizes) {
+                String name = kind + "_" + size + ".txt";
                 Path file = dir.resolve(name);
-                check(Files.exists(file), name + ": phai ton tai trong datasets/");
-                if (!Files.exists(file)) continue;
+                if (!Files.isRegularFile(file)) {
+                    check(false, "thieu bo du lieu " + name);
+                    continue;
+                }
 
                 int[] data = Experiment.readData(file);
-                check(data.length == n,
-                    name + ": phai co " + n + " phan tu, thuc te " + data.length);
+                check(data.length == size,
+                    name + ": phai co " + size + " phan tu, thuc te " + data.length);
 
-                for (int cutoff : datasetCutoffs) {
-                    checkSortsLikeJdk(data, cutoff, name);
+                int[] expected = data.clone();
+                Arrays.sort(expected);
+                for (int cutoff : Experiment.CUTOFFS) {
+                    int[] actual = data.clone();
+                    MergeSort.sort(actual, cutoff);
+                    check(Arrays.equals(actual, expected),
+                        name + " (n=" + data.length + ", cutoff=" + cutoff + ")");
+                    check(MergeSort.isSorted(actual),
+                        name + ": isSorted (cutoff=" + cutoff + ")");
                 }
             }
         }
     }
-
     public static void main(String[] args) throws Exception {
         testArguments();
         testTinyArrays();
