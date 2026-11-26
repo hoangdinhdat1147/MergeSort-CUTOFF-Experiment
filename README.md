@@ -152,7 +152,7 @@ Dashboard chỉ đọc dữ liệu từ `docs/data/`; **không chạy lại thu�
 
 ### Kiểm thử
 
-[`test/MergeSortTest.java`](test/MergeSortTest.java) so sánh với `Arrays.sort` trên dữ liệu rỗng, rất nhỏ, ngẫu nhiên, trùng lặp, giá trị biên, tăng/giảm/gần tăng dần và các bộ dữ liệu thật.
+[`test/MergeSortTest.java`](test/MergeSortTest.java) so sánh với `Arrays.sort` trên dữ liệu rỗng, rất nhỏ, ngẫu nhiên, trùng lặp, giá trị biên, tăng/giảm/gần tăng dần và **toàn bộ 16 bộ dữ liệu thật**. Với 16 bộ dữ liệu thật, test dùng 4 CUTOFF đại diện `1, 7, 10, 64` để giữ thời gian CI hợp lý; các CUTOFF khác đã được kiểm thử trên nhiều kích thước dữ liệu tổng hợp.
 
 GitHub Actions trong [`.github/workflows/ci.yml`](.github/workflows/ci.yml) kiểm tra trên **JDK 11, 17 và 21**, đồng thời:
 
