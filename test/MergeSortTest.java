@@ -141,20 +141,36 @@ public class MergeSortTest {
         check(!MergeSort.isSorted(new int[] {2, 1}), "isSorted: hai phan tu nguoc");
     }
 
-    /** Kiểm tra các bộ dữ liệu thật của dự án (bỏ qua nếu chạy ngoài thư mục gốc). */
+    /** Kiểm tra toàn bộ 16 bộ dữ liệu thật của dự án (bỏ qua nếu chạy ngoài thư mục gốc). */
     private static void testRepositoryDatasets() throws Exception {
         Path dir = Paths.get("datasets");
         if (!Files.isDirectory(dir)) {
             System.out.println("Bo qua kiem thu datasets/ (khong tim thay thu muc, hay chay tu thu muc goc).");
             return;
         }
-        String[] names = {"random_10000.txt", "sorted_10000.txt", "reverse_10000.txt", "nearly_sorted_10000.txt"};
-        for (String name : names) {
-            Path file = dir.resolve(name);
-            if (!Files.exists(file)) continue;
-            int[] data = Experiment.readData(file);
-            check(data.length == 10_000, name + ": phai co 10000 phan tu, thuc te " + data.length);
-            for (int cutoff : Experiment.CUTOFFS) checkSortsLikeJdk(data, cutoff, name);
+
+        int[] sizes = {10_000, 50_000, 100_000, 250_000};
+        String[] kinds = {"random", "sorted", "reverse", "nearly_sorted"};
+        // Bao phủ toàn bộ 16 bộ dữ liệu, nhưng chỉ dùng các CUTOFF đại diện
+        // để giữ thời gian CI hợp lý. Các CUTOFF còn lại đã được kiểm thử
+        // rộng trên dữ liệu tổng hợp ở các test phía trên.
+        int[] datasetCutoffs = {1, 7, 10, 64};
+
+        for (String kind : kinds) {
+            for (int n : sizes) {
+                String name = kind + "_" + n + ".txt";
+                Path file = dir.resolve(name);
+                check(Files.exists(file), name + ": phai ton tai trong datasets/");
+                if (!Files.exists(file)) continue;
+
+                int[] data = Experiment.readData(file);
+                check(data.length == n,
+                    name + ": phai co " + n + " phan tu, thuc te " + data.length);
+
+                for (int cutoff : datasetCutoffs) {
+                    checkSortsLikeJdk(data, cutoff, name);
+                }
+            }
         }
     }
 
