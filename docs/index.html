@@ -195,6 +195,7 @@
             <option value="nearly_sorted">Gần tăng dần</option>
           </select>
         </div>
+        <div class="control"><label for="sizeSelect">Kích thước mảng</label><select id="sizeSelect"></select></div>
         <div class="control" style="min-width:118px">
           <label for="speedSelect">Tốc độ chuyển</label>
           <select id="speedSelect"><option value="1800">Chậm</option><option value="1100" selected>Vừa</option><option value="650">Nhanh</option></select>
@@ -381,6 +382,12 @@
       annotations:[{text:'Ngôi sao: median thấp nhất trong 18 CUTOFF đã thử',xref:'paper',yref:'paper',x:1,y:1.12,xanchor:'right',showarrow:false,font:{size:10,color:'#68798c'}}]
     };
   }
+  const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  function runtimeAnimation() {
+    if (reduceMotion) return false;
+    const speed = Number(byId('speedSelect').value) || 1100;
+    return { duration: Math.min(1000, Math.round(speed * 0.9)), easing: 'easeOutQuart' };
+  }
   const runtimeErrorBarPlugin = {
     id: 'runtimeErrorBars',
 
@@ -408,8 +415,9 @@
 
           if (!Number.isFinite(value) || !Number.isFinite(sd)) return;
 
-          const top = yScale.getPixelForValue(value + sd);
-          const bottom = yScale.getPixelForValue(value - sd);
+          const base = yScale.getPixelForValue(value);
+          const top = point.y - Math.abs(base - yScale.getPixelForValue(value + sd));
+          const bottom = point.y + Math.abs(yScale.getPixelForValue(value - sd) - base);
           const x = point.x;
           const cap = 3.5;
 
@@ -593,10 +601,7 @@
         responsive: true,
         maintainAspectRatio: false,
 
-        animation: {
-          duration: 750,
-          easing: 'easeInOutCubic'
-        },
+        animation: runtimeAnimation(),
 
         transitions: {
           active: {
@@ -694,29 +699,15 @@
 
   function updateRuntimeChart(animated = true) {
     if (!runtimeChartJS) return;
-
+    if (animated) { createRuntimeChart(); return; }
     const n = SIZES[animationIndex];
     const datasets = runtimeBuildDatasets(n);
-
-    runtimeChartJS.data.labels = CUTOFFS.map(String);
     runtimeChartJS.data.datasets = datasets;
-
-    runtimeChartJS.options.animation = animated
-      ? {
-          duration: 750,
-          easing: 'easeInOutCubic'
-        }
-      : false;
-
-    runtimeChartJS.options.scales.y.suggestedMax =
-      runtimeYMax(datasets);
-
-    runtimeChartJS.options.plugins.title.text =
-      `Median thời gian chạy · N = ${nf0.format(n)}`;
-
+    runtimeChartJS.options.animation = false;
+    runtimeChartJS.options.scales.y.suggestedMax = runtimeYMax(datasets);
+    runtimeChartJS.options.plugins.title.text = `Median thời gian chạy · N = ${nf0.format(n)}`;
     runtimeChartJS.update();
   }
-
   function applyDistributionVisibility() {
     if (!plotReady || !runtimeChartJS) return;
 
@@ -733,6 +724,7 @@
 
     byId('sizeSlider').value = animationIndex;
     byId('sizeValue').textContent = nf0.format(n);
+    if (byId('sizeSelect')) byId('sizeSelect').value = String(animationIndex);
 
     if (plotReady) {
       updateRuntimeChart(animated);
@@ -837,6 +829,37 @@
       font:{family:'Inter, Segoe UI, sans-serif',color:'#33465a',size:12}
     },{responsive:true,displaylogo:false});
   }
+  function setupRevealAnimations() {
+    const cmp = byId('comparisonChart'), best = byId('bestChart');
+    const cF = { x: cmp.data[0].x.slice(), text: cmp.data[0].text.slice() };
+    const bF = { z: best.data[0].z.map(r => r.slice()), text: best.data[0].text.map(r => r.slice()) };
+    const cols = bF.z[0].length;
+    let cTok = 0, bTok = 0;
+    const bMask = k => ({ z: [bF.z.map(r => r.map((v, j) => j < k ? v : null))],
+                          text: [bF.text.map(r => r.map((v, j) => j < k ? v : ''))] });
+    const hideCmp = () => { cTok++; return Plotly.restyle(cmp, { x: [cF.x.map(() => 0)], text: [cF.text.map(() => '')] }, [0]); };
+    const hideBest = () => { bTok++; return Plotly.restyle(best, bMask(0), [0]); };
+    function showCmp() {
+      const t = ++cTok;
+      Plotly.animate(cmp, { data: [{ x: cF.x }], traces: [0] },
+        { transition: { duration: 1000, easing: 'cubic-out' }, frame: { duration: 1000, redraw: false } })
+        .then(() => { if (t === cTok) Plotly.restyle(cmp, { text: [cF.text] }, [0]); });
+    }
+    function showBest() {
+      const t = ++bTok;
+      for (let k = 1; k <= cols; k++) setTimeout(() => { if (t === bTok) Plotly.restyle(best, bMask(k), [0]); }, k * 260);
+    }
+    if (reduceMotion || !('IntersectionObserver' in window)) return;
+    hideCmp(); hideBest();
+    const io = new IntersectionObserver(entries => entries.forEach(e => {
+      const isCmp = e.target === cmp;
+      if (!e.isIntersecting) { e.target.dataset.seen = ''; isCmp ? hideCmp() : hideBest(); return; }
+      if (e.target.dataset.seen) return;
+      e.target.dataset.seen = '1';
+      isCmp ? showCmp() : showBest();
+    }), { threshold: 0.35 });
+    io.observe(cmp); io.observe(best);
+  }
   function createTables() {
     const bestBody = byId('bestTable').querySelector('tbody');
     bestBody.innerHTML = sortedDatasets(bestRows).map(r => {
@@ -858,6 +881,11 @@
         }
       }
     );
+
+    const sizeSelect = byId('sizeSelect');
+    SIZES.forEach((n, i) => sizeSelect.add(new Option(nf0.format(n), String(i))));
+    sizeSelect.value = String(animationIndex);
+    sizeSelect.addEventListener('change', e => { pauseAnimation(); updateSize(e.target.value, true); });
 
     byId('sizeSlider').addEventListener(
       'input',
@@ -956,6 +984,7 @@
       await createRuntimeChart();
       createComparisonChart();
       createBestChart();
+      setupRevealAnimations();
       createTables();
       attachControls();
       byId('loadStatus').classList.add('ready');
