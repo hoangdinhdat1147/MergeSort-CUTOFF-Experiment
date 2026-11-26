@@ -151,11 +151,11 @@ def main() -> int:
 
     best_rows = [best[k] for k in sorted(best)]
     write_csv(args.out / "best_cutoff.csv", ["dataset", "n", "cutoff", "median_ms"],
-              [{k: r[k] for k in ("dataset", "n", "cutoff", "median_ms")} for r in best_rows])
+              [{"dataset": r["dataset"], "n": r["n"], "cutoff": r["cutoff"], "median_ms": f"{r['median_ms']:.4f}"} for r in best_rows])
     write_csv(args.out / "best_cutoff_from_run.csv",
               ["dataset", "n", "best_cutoff_among_tested", "median_ms"],
               [{"dataset": r["dataset"], "n": r["n"], "best_cutoff_among_tested": r["cutoff"],
-                "median_ms": r["median_ms"]} for r in best_rows])
+                "median_ms": f"{r['median_ms']:.4f}"} for r in best_rows])
     write_csv(args.out / "cutoff_7_10_comparison.csv", list(comparison[0].keys()), comparison)
 
     if not args.no_plots:
