@@ -1,8 +1,18 @@
-﻿*.class
+# Java: tệp đã biên dịch và thư mục đầu ra của javac
+*.class
+out/
+
+# Python
 __pycache__/
 *.py[cod]
+
+# Trình soạn thảo / hệ điều hành
 .idea/
 .vscode/
+.DS_Store
+Thumbs.db
+
+# Nhật ký và bản sao lưu các lần chạy cũ (do run_experiment.* tạo ra)
 *.log
 results_old_*.csv
 analysis_old_*/

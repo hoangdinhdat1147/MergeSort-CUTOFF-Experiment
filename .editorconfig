@@ -1,0 +1,23 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{yml,yaml,html}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.bat]
+end_of_line = crlf
+
+# Không thêm dòng trống cuối tệp để không làm đổi SHA-256 của bộ dữ liệu.
+[datasets/*.txt]
+insert_final_newline = false
+trim_trailing_whitespace = false

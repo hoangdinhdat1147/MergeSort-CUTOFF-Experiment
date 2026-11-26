@@ -1,4 +1,4 @@
-﻿dataset,n,median_cutoff_7_ms,median_cutoff_10_ms,difference_percent_T10_vs_T7,stdev_cutoff_7_ms,stdev_cutoff_10_ms,lower_median
+dataset,n,median_cutoff_7_ms,median_cutoff_10_ms,difference_percent_T10_vs_T7,stdev_cutoff_7_ms,stdev_cutoff_10_ms,lower_median
 nearly_sorted_10000.txt,10000,0.1518,0.1545,1.78,0.0517,0.0445,CUTOFF 7
 nearly_sorted_100000.txt,100000,1.8126,1.8279,0.84,0.0889,0.123,CUTOFF 7
 nearly_sorted_250000.txt,250000,5.0018,4.9023,-1.99,0.1392,0.447,CUTOFF 10

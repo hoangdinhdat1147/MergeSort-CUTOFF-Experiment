@@ -1,4 +1,4 @@
-﻿dataset,n,best_cutoff_among_tested,median_ms
+dataset,n,best_cutoff_among_tested,median_ms
 nearly_sorted_10000.txt,10000,48,0.127
 nearly_sorted_100000.txt,100000,64,1.6507
 nearly_sorted_250000.txt,250000,64,4.3582

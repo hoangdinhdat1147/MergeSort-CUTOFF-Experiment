@@ -1,0 +1,6 @@
+# Chỉ cần cho các script phân tích và vẽ biểu đồ:
+#   scripts/analyze_results.py, scripts/make_animated_charts.py
+# Benchmark Java và việc sinh/kiểm tra dữ liệu không cần thư viện ngoài.
+# Cài bằng: python -m pip install -r requirements.txt
+matplotlib>=3.7
+pillow>=9.1

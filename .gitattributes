@@ -1,0 +1,14 @@
+# Chuẩn hóa ký tự xuống dòng để repo giống nhau trên Windows/Linux/macOS.
+* text=auto eol=lf
+
+# Tệp batch của Windows cần CRLF (kể cả khi tải về dạng ZIP từ GitHub).
+*.bat text eol=crlf
+*.sh  text eol=lf
+
+# Bộ dữ liệu: giữ nguyên từng byte để khớp datasets/SHA256SUMS.
+datasets/*.txt -text
+
+# Tệp nhị phân.
+*.png  binary
+*.gif  binary
+*.docx binary

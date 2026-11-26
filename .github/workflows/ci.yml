@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Build, test & verify (JDK ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['11', '17', '21']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Compile
+        run: |
+          mkdir -p out
+          javac -Xlint:all -encoding UTF-8 -d out src/MergeSort.java src/Experiment.java test/MergeSortTest.java
+
+      - name: Unit tests
+        run: java -cp out MergeSortTest
+
+      - name: Verify datasets (SHA-256)
+        run: python scripts/generate_data.py --verify
+
+      - name: Smoke-run benchmark (no warm-up, 1 repeat)
+        run: |
+          java -cp out Experiment datasets out/smoke_results.csv --warmups 0 --repeats 1
+          # 16 bộ dữ liệu x 18 CUTOFF x 1 lần đo + 1 dòng tiêu đề
+          test "$(wc -l < out/smoke_results.csv)" -eq 289
+
+      - name: Smoke-run analysis (including plots)
+        run: python scripts/analyze_results.py --input out/smoke_results.csv --out out/smoke_analysis
+
+      - name: Committed tables are reproducible from results.csv
+        run: |
+          python scripts/analyze_results.py --out out/repro --no-plots
+          for f in summary.csv best_cutoff.csv best_cutoff_from_run.csv cutoff_7_10_comparison.csv; do
+            diff -u "analysis/$f" "out/repro/$f"
+          done
+
+      - name: Dashboard data is in sync with analysis/
+        run: |
+          for f in summary.csv cutoff_7_10_comparison.csv best_cutoff_from_run.csv; do
+            cmp "analysis/$f" "docs/data/$f"
+          done
+
+      - name: Python scripts compile
+        run: python -m py_compile scripts/*.py
